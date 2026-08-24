@@ -24,6 +24,7 @@ export const caseUiText = {
   clearSelection: { en: 'Clear selection', ru: 'Снять выбор' },
   selectedEvidence: { en: 'Selected evidence', ru: 'Выбранные улики' },
   deductionAdded: { en: 'Deduction added.', ru: 'Вывод добавлен.' },
+  deductionAlreadyMade: { en: 'That deduction was already made.', ru: 'Этот вывод уже сделан.' },
   notEnoughEvidence: { en: 'Not enough evidence for that deduction.', ru: 'Для этого вывода недостаточно улик.' },
   closeNotebook: { en: 'Close notebook', ru: 'Закрыть блокнот' },
   closeMap: { en: 'Close map', ru: 'Закрыть карту' },

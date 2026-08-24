@@ -43,3 +43,21 @@
 
 - Theory and reconstruction remain deferred to Task 5; no Task 5 interfaces were added or preempted.
 - `toggleEvidence` extends reducer action surface while preserving persisted `selectedEvidenceIds` shape and existing deduction rules.
+
+## Re-review Fixes
+
+- Aligned case hotspot placements with visible SVG props across kitchen, living room, garden, corridor, and shed. Added visible secondary props for footprints, pantry residue, invitation, broken stem, scarf thread, and the covered cake.
+- Added exported normalized `sceneHotspotBounds` contract and a test invariant covering every case hotspot coordinate.
+- Prevented repeated completed deductions from dispatching or reporting success; UI now reports that deduction was already made.
+- Preserved normalized character centering during hover/focus with `translate(-50%, calc(-50% - 2px))`.
+- Expanded focused UI tests for coordinate alignment, duplicate deduction feedback, map close button, and map backdrop dismissal.
+
+## Re-review Fix Verification
+
+- `rtk npm test -- --run`: PASS, 41 tests across 3 files.
+- `rtk npm run typecheck`: PASS.
+- `rtk npm run build`: PASS.
+
+## Remaining Concerns
+
+- Responsive behavior is exercised through DOM panel close paths; actual CSS media-query layout remains a visual/manual concern rather than a browser automation dependency.

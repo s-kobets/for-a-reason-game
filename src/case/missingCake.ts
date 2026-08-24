@@ -42,11 +42,11 @@ export const missingCakeCase: CaseDefinition = {
   ],
   hotspots: [
     {
-      id: 'cake-stand', locationId: 'kitchen', placement: { x: 0.28, y: 0.58 }, title: { en: 'Empty cake stand', ru: 'Пустая подставка' },
+      id: 'cake-stand', locationId: 'kitchen', placement: { x: 0.65, y: 0.44 }, title: { en: 'Empty cake stand', ru: 'Пустая подставка' },
       description: { en: 'A clean ring of frosting marks where the cake stood.', ru: 'Чистое кольцо крема показывает, где стоял торт.' }, observationId: 'cake-missing',
     },
     {
-      id: 'kitchen-window', locationId: 'kitchen', placement: { x: 0.78, y: 0.25 }, title: { en: 'Open window', ru: 'Открытое окно' },
+      id: 'kitchen-window', locationId: 'kitchen', placement: { x: 0.23, y: 0.36 }, title: { en: 'Open window', ru: 'Открытое окно' },
       description: { en: 'The latch is open and the sill has fresh soil on it.', ru: 'Шпингалет открыт, а на подоконнике свежая земля.' }, observationId: 'window-open',
     },
     {
@@ -58,11 +58,11 @@ export const missingCakeCase: CaseDefinition = {
       description: { en: 'A blue smear catches on the pantry door handle.', ru: 'На ручке кладовой остался синий след.' }, observationId: 'frosting-trail',
     },
     {
-      id: 'party-invitation', locationId: 'living-room', placement: { x: 0.34, y: 0.62 }, title: { en: 'Party invitation', ru: 'Приглашение на праздник' },
+      id: 'party-invitation', locationId: 'living-room', placement: { x: 0.67, y: 0.44 }, title: { en: 'Party invitation', ru: 'Приглашение на праздник' },
       description: { en: 'The celebration was planned for four o’clock.', ru: 'Праздник был назначен на четыре часа.' }, observationId: 'party-time',
     },
     {
-      id: 'wet-umbrella', locationId: 'living-room', placement: { x: 0.82, y: 0.71 }, title: { en: 'Wet umbrella', ru: 'Мокрый зонт' },
+      id: 'wet-umbrella', locationId: 'living-room', placement: { x: 0.88, y: 0.35 }, title: { en: 'Wet umbrella', ru: 'Мокрый зонт' },
       description: { en: 'Rain stopped shortly before the cake disappeared.', ru: 'Дождь закончился незадолго до исчезновения торта.' }, observationId: 'recent-rain',
     },
     {
@@ -74,23 +74,23 @@ export const missingCakeCase: CaseDefinition = {
       description: { en: 'Something brushed past the flower bed recently.', ru: 'Кто-то недавно задел клумбу.' }, observationId: 'garden-disturbance',
     },
     {
-      id: 'garden-lantern', locationId: 'garden', placement: { x: 0.76, y: 0.31 }, title: { en: 'Garden lantern', ru: 'Садовый фонарь' },
+      id: 'garden-lantern', locationId: 'garden', placement: { x: 0.85, y: 0.4 }, title: { en: 'Garden lantern', ru: 'Садовый фонарь' },
       description: { en: 'Its glass is dusty and its wick is untouched.', ru: 'Стекло пыльное, фитиль не трогали.' }, decorative: true,
     },
     {
-      id: 'scarf-thread', locationId: 'corridor', placement: { x: 0.62, y: 0.29 }, title: { en: 'Blue scarf thread', ru: 'Нитка синего шарфа' },
+      id: 'scarf-thread', locationId: 'corridor', placement: { x: 0.76, y: 0.39 }, title: { en: 'Blue scarf thread', ru: 'Нитка синего шарфа' },
       description: { en: 'A bright blue thread is caught on the window latch.', ru: 'Яркая синяя нитка зацепилась за шпингалет.' }, observationId: 'scarf-thread', falseLead: { en: 'It could be from any blue garment, but Petya wears a matching scarf.', ru: 'Она могла попасть от любой синей одежды, но Петя носит такой шарф.' }, falseLeadEvidenceIds: ['mira-blue-scarf'],
     },
     {
-      id: 'back-door', locationId: 'corridor', placement: { x: 0.2, y: 0.38 }, title: { en: 'Back door', ru: 'Задняя дверь' },
+      id: 'back-door', locationId: 'corridor', placement: { x: 0.5, y: 0.48 }, title: { en: 'Back door', ru: 'Задняя дверь' },
       description: { en: 'Dust on the threshold is unbroken.', ru: 'Пыль на пороге не потревожена.' }, observationId: 'door-unused',
     },
     {
-      id: 'shed-latch', locationId: 'shed', placement: { x: 0.38, y: 0.43 }, title: { en: 'Shed latch', ru: 'Задвижка сарая' },
+      id: 'shed-latch', locationId: 'shed', placement: { x: 0.55, y: 0.68 }, title: { en: 'Shed latch', ru: 'Задвижка сарая' },
       description: { en: 'The latch has a fresh blue frosting mark.', ru: 'На задвижке свежий след синего крема.' }, observationId: 'shed-frosting',
     },
     {
-      id: 'hidden-cake', locationId: 'shed', placement: { x: 0.68, y: 0.64 }, title: { en: 'Covered cake', ru: 'Накрытый торт' },
+      id: 'hidden-cake', locationId: 'shed', placement: { x: 0.3, y: 0.69 }, title: { en: 'Covered cake', ru: 'Накрытый торт' },
       description: { en: 'The missing cake is safe under a clean cloth.', ru: 'Пропавший торт цел и спрятан под чистой тканью.' }, observationId: 'cake-in-shed',
     },
     {

@@ -114,7 +114,7 @@ h1 {
 .hotspot.is-discovered .hotspot-ring { fill: #c8e0bb; }
 .character-layer { position: absolute; inset: 0; pointer-events: none; }
 .character-card { position: absolute; display: flex; align-items: center; gap: .55rem; transform: translate(-50%, -50%); border: 1px solid rgba(105,71,57,.25); border-radius: .75rem; padding: .45rem .7rem; color: #30271f; background: rgba(255,250,243,.94); text-align: left; cursor: pointer; pointer-events: auto; }
-.character-card:hover, .character-card:focus-visible { transform: translateY(-2px); outline: 3px solid #f9cf7c; }
+.character-card:hover, .character-card:focus-visible { transform: translate(-50%, calc(-50% - 2px)); outline: 3px solid #f9cf7c; }
 .character-avatar, .dialogue-portrait { display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 50%; color: #fffaf3; background: #8b5e4b; font-weight: 700; }
 .character-card small { display: block; color: #705e53; }
 .sidebar { display: grid; gap: 1rem; }

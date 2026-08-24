@@ -6,6 +6,7 @@ import { gameReducer } from '../game/reducer'
 import { acquiredEvidenceIds, canPresentContradiction } from '../game/rules'
 import { freshGameState, type GameState } from '../game/state'
 import { GameShell } from './GameShell'
+import { sceneHotspotBounds } from './SceneArtwork'
 
 function renderGame(state: GameState = freshGameState()) {
   function Harness() {
@@ -55,6 +56,30 @@ describe('GameShell', () => {
     expect(screen.getByText('Rain timing and soft mud place the tracks after the shower.')).toBeTruthy()
   })
 
+  it('keeps every case hotspot inside its visible scene prop bounds', () => {
+    for (const hotspot of missingCakeCase.hotspots) {
+      const bounds = sceneHotspotBounds[hotspot.id]
+      expect(bounds, hotspot.id).toBeTruthy()
+      expect(hotspot.placement.x).toBeGreaterThanOrEqual(bounds.x[0])
+      expect(hotspot.placement.x).toBeLessThanOrEqual(bounds.x[1])
+      expect(hotspot.placement.y).toBeGreaterThanOrEqual(bounds.y[0])
+      expect(hotspot.placement.y).toBeLessThanOrEqual(bounds.y[1])
+    }
+  })
+
+  it('does not report success when repeating a completed deduction', () => {
+    const state = { ...freshGameState(), discoveredHotspotIds: ['muddy-footprints', 'wet-umbrella'] }
+    renderGame(state)
+
+    fireEvent.click(screen.getByRole('button', { name: /Small muddy prints/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Rain made the footprints/ }))
+    fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
+    expect(screen.getByRole('status').textContent).toMatch(/deduction added/i)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
+    expect(screen.getByRole('status').textContent).toMatch(/already made/i)
+    expect(screen.getByRole('status').textContent).not.toMatch(/^Deduction added\.$/)
+  })
+
   it('shows statement responses and contradiction evidence before presenting it', async () => {
     const state = { ...freshGameState(), locationId: 'kitchen', discoveredHotspotIds: ['muddy-footprints', 'scarf-thread', 'garden-path'] }
     const afterQuestion = gameReducer(state, { type: 'askQuestion', questionId: 'ask-petya-garden' })
@@ -89,6 +114,19 @@ describe('GameShell', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     await waitFor(() => expect(document.activeElement).toBe(notebookTrigger))
     expect(screen.queryByRole('dialog', { name: 'Notebook' })).toBeNull()
+  })
+
+  it('closes mobile map through its close button and backdrop', () => {
+    renderGame()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Map' }))
+    expect(screen.getByRole('dialog', { name: 'Map' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Close map' }))
+    expect(screen.queryByRole('dialog', { name: 'Map' })).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Map' }))
+    fireEvent.mouseDown(screen.getByRole('presentation'))
+    expect(screen.queryByRole('dialog', { name: 'Map' })).toBeNull()
   })
 
   it('renders Russian labels after language switch', () => {

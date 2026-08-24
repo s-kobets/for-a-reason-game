@@ -65,6 +65,10 @@ export function GameShell({ caseData, state, dispatch }: GameShellProps) {
   }
   const handleDeduction = (deductionId: string) => {
     const deduction = caseData.deductions.find(({ id }) => id === deductionId)
+    if (state.deductionIds.includes(deductionId)) {
+      setDeductionFeedback(getText(caseUiText.deductionAlreadyMade, state.language))
+      return
+    }
     if (!deduction || !canMakeDeduction(deduction, state)) {
       setDeductionFeedback(getText(caseUiText.notEnoughEvidence, state.language))
       return
