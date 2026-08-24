@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import * as React from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { missingCakeCase } from '../case/missingCake'
 import { gameReducer } from '../game/reducer'
 import { acquiredEvidenceIds, canPresentContradiction } from '../game/rules'
@@ -8,6 +8,7 @@ import { freshGameState, type GameState, type Theory } from '../game/state'
 import type { GameAction } from '../game/reducer'
 import { GameShell } from './GameShell'
 import { sceneHotspotBounds } from './SceneArtwork'
+import { loadGame, saveGame } from '../game/storage'
 
 function renderGame(state: GameState = freshGameState()) {
   function Harness() {
@@ -36,7 +37,11 @@ function renderTheoryHarness(initialState: GameState = freshGameState()) {
 const completeTheory: Theory = { person: 'petya', origin: 'kitchen', entryMethod: 'window', event: 'moved-to-shed', motive: 'surprise' }
 
 describe('GameShell', () => {
-  afterEach(cleanup)
+  beforeEach(() => localStorage.clear())
+  afterEach(() => {
+    cleanup()
+    localStorage.clear()
+  })
   it('renders current location and investigation controls', () => {
     renderGame()
 
@@ -165,6 +170,7 @@ describe('GameShell', () => {
     expect(screen.queryByRole('heading', { name: 'Reconstruction' })).toBeNull()
 
     fireEvent.change(screen.getByLabelText('Who'), { target: { value: completeTheory.person } })
+    expect(screen.queryByRole('status')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Submit theory' }))
     expect(screen.getByRole('status').textContent).toMatch(/part of your theory/i)
     expect(screen.queryByRole('heading', { name: 'Reconstruction' })).toBeNull()
@@ -194,6 +200,21 @@ describe('GameShell', () => {
     const persistedStep = missingCakeCase.reconstruction.length - 2
     renderTheoryHarness({ ...freshGameState(), theory: completeTheory, reconstructionStep: persistedStep })
 
+    expect(screen.getByText(missingCakeCase.reconstruction[persistedStep].text.en)).toBeTruthy()
+  })
+
+  it('round-trips theory and reconstruction progress through storage boundary', () => {
+    const persistedStep = missingCakeCase.reconstruction.length - 2
+    const { getState } = renderTheoryHarness({ ...freshGameState(), theory: completeTheory, reconstructionStep: persistedStep })
+    saveGame(getState())
+
+    const loadedState = loadGame()
+    expect(loadedState.theory).toEqual(completeTheory)
+    expect(loadedState.reconstructionStep).toBe(persistedStep)
+
+    cleanup()
+    renderGame(loadedState)
+    expect((screen.getByLabelText('Who') as HTMLSelectElement).value).toBe('petya')
     expect(screen.getByText(missingCakeCase.reconstruction[persistedStep].text.en)).toBeTruthy()
   })
 })

@@ -33,3 +33,9 @@ Implemented theory flow and sequential reconstruction.
 - Changed SVG accessible names from timestamps to localized reconstruction text and tested the contract.
 - Expanded theory tests to cover all five field updates, option counts, Russian labels, and translated options.
 - Added visible `:focus-visible` styling for selects and reconstruction/theory controls.
+
+## Re-review Follow-up
+
+- Added GameShell integration coverage that saves completed theory and reconstruction progress with `saveGame`, reloads through `loadGame`, and renders the loaded state.
+- Added a direct assertion that wrong feedback disappears immediately after changing a theory field, before retry submission.
+- No runtime behavior changes were needed.
