@@ -48,6 +48,23 @@ describe('GameShell', () => {
     expect(screen.getByRole('heading', { name: 'Kitchen' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Notebook' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Map' })).toBeTruthy()
+    expect(screen.getByText('0 / 13 clues found')).toBeTruthy()
+  })
+
+  it('shows evidence progress for every map location', () => {
+    renderGame()
+
+    expect(screen.getAllByText('0 / 5 clues').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('0 / 2 clues').length).toBeGreaterThan(0)
+  })
+
+  it('makes Inspect reveal hotspot guidance', () => {
+    renderGame()
+
+    expect(screen.getByRole('button', { name: 'Show inspection hints' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Show inspection hints' }))
+    expect(document.querySelector('.scene-artwork.inspect-mode')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Hide inspection hints' })).toBeTruthy()
   })
 
   it('discovers meaningful hotspots but keeps decorative hotspots atmospheric', () => {
@@ -71,13 +88,41 @@ describe('GameShell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Small muddy prints/ }))
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
-    expect(screen.getByRole('status').textContent).toMatch(/not enough evidence/i)
+    expect(screen.getByRole('status').textContent).toMatch(/select the required clues/i)
     expect(screen.getByRole('status').textContent).not.toMatch(/Rain timing/)
 
     fireEvent.click(screen.getByRole('button', { name: /Rain made the footprints/ }))
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
     expect(screen.getByRole('status').textContent).toMatch(/deduction added/i)
     expect(screen.getByText('Rain timing and soft mud place the tracks after the shower.')).toBeTruthy()
+  })
+
+  it('explains that observations and statements are selected for deductions', () => {
+    renderGame()
+
+    expect(screen.getByText(/select observations and statements/i)).toBeTruthy()
+    expect(screen.getAllByText(/needed clues/i).length).toBeGreaterThan(0)
+  })
+
+  it('places theory before the long notebook content', () => {
+    renderGame()
+
+    const theory = screen.getByRole('heading', { name: 'Your theory' })
+    const notebook = screen.getByRole('heading', { name: 'Notebook' }).closest('section')!
+    expect(theory.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('renders desktop investigation panels in Map, Scene, Theory, Notebook order', () => {
+    renderGame()
+
+    const map = screen.getByRole('heading', { name: 'Map' })
+    const scene = screen.getByRole('heading', { name: 'Kitchen' })
+    const theory = screen.getByRole('heading', { name: 'Your theory' })
+    const notebook = screen.getByRole('heading', { name: 'Notebook' })
+
+    expect(map.compareDocumentPosition(scene) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(scene.compareDocumentPosition(theory) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(theory.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('keeps every case hotspot inside its visible scene prop bounds', () => {

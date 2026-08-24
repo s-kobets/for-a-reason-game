@@ -1,5 +1,5 @@
+import { useState } from 'react'
 import type { Character, Hotspot, Location } from '../case/types'
-import type { GameAction } from '../game/reducer'
 import type { GameState } from '../game/state'
 import { getText, caseUiText } from '../case/translations'
 import { SCENE_ASPECT_RATIO, SceneArtwork } from './SceneArtwork'
@@ -9,12 +9,14 @@ interface SceneViewProps {
   state: GameState;
   hotspots: Hotspot[];
   characters: Character[];
-  onAction(action: GameAction): void;
   onHotspot(hotspot: Hotspot): void;
   onCharacter(character: Character): void;
+  totalClues: number;
+  foundClues: number;
 }
 
-export function SceneView({ location, state, hotspots, characters, onAction, onHotspot, onCharacter }: SceneViewProps) {
+export function SceneView({ location, state, hotspots, characters, onHotspot, onCharacter, totalClues, foundClues }: SceneViewProps) {
+  const [showHints, setShowHints] = useState(false)
   return (
     <section className="scene-card" aria-labelledby="scene-title">
       <div className="scene-heading">
@@ -23,10 +25,10 @@ export function SceneView({ location, state, hotspots, characters, onAction, onH
           <h1 id="scene-title">{getText(location.title, state.language)}</h1>
           <p>{getText(location.description, state.language)}</p>
         </div>
-        <span className="scene-status">{state.discoveredHotspotIds.length} {getText(caseUiText.discovered, state.language)}</span>
+            <span className="scene-status">{foundClues} / {totalClues} {getText(caseUiText.cluesFound, state.language)}</span>
       </div>
       <div className="scene-stage" style={{ aspectRatio: SCENE_ASPECT_RATIO }}>
-        <SceneArtwork sceneId={location.sceneId} sceneTitle={location.title} hotspots={hotspots} language={state.language} discoveredHotspotIds={state.discoveredHotspotIds} onHotspot={onHotspot} />
+        <SceneArtwork sceneId={location.sceneId} sceneTitle={location.title} hotspots={hotspots} language={state.language} discoveredHotspotIds={state.discoveredHotspotIds} showHints={showHints} onHotspot={onHotspot} />
         <div className="character-layer" aria-label={getText(caseUiText.talkTo, state.language)}>
           {characters.map((character) => (
             <button id={`character-${character.id}`} data-character-id={character.id} key={character.id} type="button" className="character-card" style={{ left: `${character.placement.x * 100}%`, top: `${character.placement.y * 100}%` }} onClick={() => onCharacter(character)}>
@@ -37,7 +39,7 @@ export function SceneView({ location, state, hotspots, characters, onAction, onH
         </div>
       </div>
       <div className="scene-actions">
-        <button type="button" onClick={() => onAction({ type: 'setLocation', locationId: location.id })}>{getText(caseUiText.inspect, state.language)}</button>
+        <button type="button" onClick={() => setShowHints((visible) => !visible)}>{getText(showHints ? caseUiText.hideInspectionHints : caseUiText.showInspectionHints, state.language)}</button>
       </div>
     </section>
   )

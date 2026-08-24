@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type Dispatch } from 'react'
-import type { CaseDefinition, Character, Hotspot, Language } from '../case/types'
+import type { CaseDefinition, Character, Hotspot, Language, LocalizedText } from '../case/types'
 import { caseUiText, getText } from '../case/translations'
 import { acquiredEvidenceIds, availableQuestions, canMakeDeduction, canPresentContradiction, scoreTheory } from '../game/rules'
 import type { GameAction } from '../game/reducer'
@@ -35,6 +35,20 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
   const characters = caseData.characters.filter(({ locationId }) => locationId === location.id)
   const acquiredIds = acquiredEvidenceIds(state)
   const evidence = caseData.evidence.filter(({ id }) => acquiredIds.includes(id))
+  const totalClues = caseData.hotspots.filter(({ observationId }) => observationId).length
+  const foundClues = caseData.hotspots.filter(({ observationId, id }) => observationId && state.discoveredHotspotIds.includes(id)).length
+  const deductionHints: Record<string, LocalizedText> = {}
+  const disabledDeductionIds: string[] = []
+  for (const deduction of caseData.deductions) {
+    if (state.deductionIds.includes(deduction.id)) continue
+    const missing = deduction.requiresEvidenceIds.filter((id) => !acquiredIds.includes(id)).length
+    if (missing > 0) {
+      deductionHints[deduction.id] = { en: `${missing} needed clues`, ru: `Нужно улик: ${missing}` }
+      disabledDeductionIds.push(deduction.id)
+    } else if (deduction.requiresEvidenceIds.some((id) => !state.selectedEvidenceIds.includes(id))) {
+      deductionHints[deduction.id] = caseUiText.selectRequiredClues
+    }
+  }
   const questions = character ? availableQuestions(character, state) : []
   const contradictionAvailable = canPresentContradiction(state) && !state.receivedStatementIds.includes(caseData.contradiction.revealedStatementId)
   const contradictionEvidence = caseData.evidence.filter(({ id }) => caseData.contradiction.evidenceIds.includes(id))
@@ -98,6 +112,17 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
       setDeductionFeedback(getText(caseUiText.deductionAlreadyMade, state.language))
       return
     }
+    if (deduction && deduction.requiresEvidenceIds.every((id) => acquiredIds.includes(id)) && deduction.requiresEvidenceIds.some((id) => !state.selectedEvidenceIds.includes(id))) {
+      setDeductionFeedback(getText(caseUiText.selectRequiredClues, state.language))
+      return
+    }
+    if (deduction) {
+      const missing = deduction.requiresEvidenceIds.filter((id) => !acquiredIds.includes(id)).length
+      if (missing > 0) {
+        setDeductionFeedback(state.language === 'en' ? `${missing} needed clues` : `Нужно улик: ${missing}`)
+        return
+      }
+    }
     if (!deduction || !canMakeDeduction(deduction, state)) {
       setDeductionFeedback(getText(caseUiText.notEnoughEvidence, state.language))
       return
@@ -121,10 +146,16 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
         <button ref={resetTriggerRef} type="button" onClick={() => setResetOpen(true)}>{getText(caseUiText.reset, state.language)}</button>
       </div>
     </header>
-    <div className="game-layout"><SceneView location={location} state={state} hotspots={hotspots} characters={characters} onAction={dispatch} onHotspot={handleHotspot} onCharacter={openCharacter} /><aside className="sidebar"><MapPanel locations={mobileLocations} language={state.language} currentLocationId={location.id} onSelectLocation={(locationId) => dispatch({ type: 'setLocation', locationId })} /><NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} /></aside></div>
-    <TheoryPanel theory={state.theory} solution={caseData.solution} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
+     <div className="game-layout">
+       <MapPanel locations={mobileLocations} hotspots={caseData.hotspots} discoveredHotspotIds={state.discoveredHotspotIds} language={state.language} currentLocationId={location.id} onSelectLocation={(locationId) => dispatch({ type: 'setLocation', locationId })} />
+       <SceneView location={location} state={state} hotspots={hotspots} characters={characters} totalClues={totalClues} foundClues={foundClues} onHotspot={handleHotspot} onCharacter={openCharacter} />
+       <TheoryPanel theory={state.theory} solution={caseData.solution} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
+     </div>
+     <div className="notebook-layout">
+       <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} deductionHints={deductionHints} disabledDeductionIds={disabledDeductionIds} />
+     </div>
     {theoryResult === 'complete' && <ReconstructionView steps={caseData.reconstruction} currentStep={state.reconstructionStep} language={state.language} onNext={() => dispatch({ type: 'setReconstructionStep', step: state.reconstructionStep + 1 })} onReplay={() => dispatch({ type: 'setReconstructionStep', step: 0 })} />}
-    {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><FocusBoundary><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />}</section></FocusBoundary></div>}
+     {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><FocusBoundary><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} hotspots={caseData.hotspots} discoveredHotspotIds={state.discoveredHotspotIds} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} deductionHints={deductionHints} disabledDeductionIds={disabledDeductionIds} />}</section></FocusBoundary></div>}
     <DialoguePanel character={character} questions={questions} statements={responses} contradiction={caseData.contradiction} contradictionEvidence={contradictionEvidence} language={state.language} contradictionAvailable={contradictionAvailable} closeRef={dialogueCloseRef} onAsk={(questionId) => dispatch({ type: 'askQuestion', questionId })} onContradiction={() => dispatch({ type: 'presentContradiction' })} onClose={closeDialogue} />
     {detail && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail() }}><FocusBoundary><section className="evidence-dialog" role="dialog" aria-modal="true" aria-labelledby={`evidence-title-${detail.id}`} aria-describedby={`evidence-description-${detail.id}`}><button ref={detailCloseRef} className="close-button" type="button" onClick={closeDetail}>{getText(caseUiText.close, state.language)}</button><p className="eyebrow">{getText(caseUiText.evidence, state.language)}</p><h2 id={`evidence-title-${detail.id}`}>{getText(detail.title, state.language)}</h2><p id={`evidence-description-${detail.id}`}>{detailDescription}</p>{detail.falseLead && <p className="false-lead">{getText(detail.falseLead, state.language)}</p>}<button type="button" onClick={closeDetail}>{getText(caseUiText.notebook, state.language)}</button></section></FocusBoundary></div>}
     {resetOpen && <div className="overlay" role="presentation"><FocusBoundary><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-description"><h2 id="reset-title">{getText(caseUiText.resetTitle, state.language)}</h2><p id="reset-description">{getText(caseUiText.resetPrompt, state.language)}</p><div className="dialog-actions"><button ref={resetCloseRef} type="button" onClick={closeReset}>{getText(caseUiText.cancel, state.language)}</button><button className="danger-button" type="button" onClick={resetGame}>{getText(caseUiText.confirmReset, state.language)}</button></div></section></FocusBoundary></div>}
