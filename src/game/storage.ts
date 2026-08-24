@@ -1,6 +1,6 @@
 import { missingCakeCase } from '../case/missingCake';
 import type { Theory } from './state';
-import { freshGameState, type GameState } from './state';
+import { freshGameState, initialGameState, type GameState } from './state';
 import { acquiredEvidenceIds } from './rules';
 
 export const STORAGE_KEY = 'missing-cake-game-v1';
@@ -40,6 +40,7 @@ function isState(value: unknown): value is GameState {
     || !hasUniqueKnownIds(state.deductionIds, deductionIds)
     || !hasUniqueKnownIds(state.selectedEvidenceIds, evidenceIds)
     || !state.openedLocationIds.includes(state.locationId)
+    || !initialGameState.openedLocationIds.every((locationId) => state.openedLocationIds?.includes(locationId))
     || !validTheory(state.theory)
     || (state.language !== 'en' && state.language !== 'ru')
     || typeof state.reconstructionStep !== 'number'

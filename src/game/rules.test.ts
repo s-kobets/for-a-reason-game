@@ -146,6 +146,7 @@ describe('game storage', () => {
     ['unacquired known evidence', { selectedEvidenceIds: ['shed-frosting'] }],
     ['duplicate IDs', { discoveredHotspotIds: ['cake-stand', 'cake-stand'] }],
     ['current location not open', { locationId: 'shed' }],
+    ['missing starting location', { openedLocationIds: ['kitchen'] }],
     ['locked location opened', { openedLocationIds: ['kitchen', 'living-room', 'garden', 'corridor', 'shed'] }],
     ['invalid theory option', { theory: { ...initialGameState.theory, person: 'unknown' } }],
     ['invalid reconstruction step', { reconstructionStep: missingCakeCase.reconstruction.length }],

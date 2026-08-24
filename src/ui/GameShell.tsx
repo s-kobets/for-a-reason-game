@@ -40,7 +40,10 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
   const contradictionEvidence = caseData.evidence.filter(({ id }) => caseData.contradiction.evidenceIds.includes(id))
   const responses = character ? caseData.statements.filter(({ id, speakerId }) => speakerId === character.id && state.receivedStatementIds.includes(id)) : []
 
-  useEffect(() => { document.title = getText(caseData.title, state.language) }, [caseData.title, state.language])
+  useEffect(() => {
+    document.title = getText(caseData.title, state.language)
+    document.documentElement.lang = state.language
+  }, [caseData.title, state.language])
   useEffect(() => { if (panel) window.setTimeout(() => panelCloseRef.current?.focus(), 0) }, [panel])
   useEffect(() => { if (character) window.setTimeout(() => dialogueCloseRef.current?.focus(), 0) }, [character])
   useEffect(() => { if (detail) window.setTimeout(() => detailCloseRef.current?.focus(), 0) }, [detail])

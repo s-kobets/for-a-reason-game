@@ -7,7 +7,7 @@ import { acquiredEvidenceIds, canPresentContradiction } from '../game/rules'
 import { freshGameState, type GameState, type Theory } from '../game/state'
 import type { GameAction } from '../game/reducer'
 import { GameShell } from './GameShell'
-import { sceneHotspotBounds } from './SceneArtwork'
+import { SCENE_ASPECT_RATIO, SCENE_VIEWBOX, sceneHotspotBounds } from './SceneArtwork'
 import { loadGame, saveGame } from '../game/storage'
 
 function renderGame(state: GameState = freshGameState()) {
@@ -89,6 +89,20 @@ describe('GameShell', () => {
       expect(hotspot.placement.y).toBeGreaterThanOrEqual(bounds.y[0])
       expect(hotspot.placement.y).toBeLessThanOrEqual(bounds.y[1])
     }
+  })
+
+  it('keeps scene artwork and character coordinates in one responsive aspect-ratio system', () => {
+    renderGame()
+
+    const stage = document.querySelector('.scene-stage') as HTMLElement
+    const artwork = stage.querySelector('svg')!
+    const character = document.getElementById('character-petya')!
+
+    expect(artwork.getAttribute('viewBox')).toBe(SCENE_VIEWBOX)
+    expect(SCENE_ASPECT_RATIO).toBeCloseTo(1000 / 620)
+    expect(Number.parseFloat(stage.style.aspectRatio)).toBeCloseTo(SCENE_ASPECT_RATIO)
+    expect(character.style.left).toBe('86%')
+    expect(Number.parseFloat(character.style.top)).toBeCloseTo(58)
   })
 
   it('does not report success when repeating a completed deduction', () => {
@@ -206,6 +220,7 @@ describe('GameShell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Change language' }))
     expect(screen.getByRole('heading', { name: 'Кухня' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Блокнот' })).toBeTruthy()
+    expect(document.documentElement.lang).toBe('ru')
   })
 
   it('integrates theory scoring, retry, evidence preservation, and reconstruction actions', () => {

@@ -2,7 +2,7 @@ import type { Character, Hotspot, Location } from '../case/types'
 import type { GameAction } from '../game/reducer'
 import type { GameState } from '../game/state'
 import { getText, caseUiText } from '../case/translations'
-import { SceneArtwork } from './SceneArtwork'
+import { SCENE_ASPECT_RATIO, SceneArtwork } from './SceneArtwork'
 
 interface SceneViewProps {
   location: Location;
@@ -25,7 +25,7 @@ export function SceneView({ location, state, hotspots, characters, onAction, onH
         </div>
         <span className="scene-status">{state.discoveredHotspotIds.length} {getText(caseUiText.discovered, state.language)}</span>
       </div>
-      <div className="scene-stage">
+      <div className="scene-stage" style={{ aspectRatio: SCENE_ASPECT_RATIO }}>
         <SceneArtwork sceneId={location.sceneId} sceneTitle={location.title} hotspots={hotspots} language={state.language} discoveredHotspotIds={state.discoveredHotspotIds} onHotspot={onHotspot} />
         <div className="character-layer" aria-label={getText(caseUiText.talkTo, state.language)}>
           {characters.map((character) => (

@@ -183,6 +183,6 @@ h1 {
 .mobile-panel-overlay { display: none; }
 .panel-close-button { display: block; margin: .8rem .9rem 0 auto; border: 1px solid #d6c4b3; border-radius: 999px; padding: .45rem .7rem; color: #694739; background: #fffaf3; cursor: pointer; }
  @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } .sidebar { display: grid; } .mobile-panel-overlay { position: fixed; inset: 0; z-index: 4; display: grid; place-items: start center; padding: 5rem 1rem 1rem; background: rgba(48,39,31,.45); } .mobile-panel { width: min(100%, 34rem); max-height: 100%; overflow: auto; } }
-@media (max-width: 600px) { .game-header { align-items: flex-start; gap: 1rem; flex-direction: column; } .header-actions { width: 100%; } .header-actions button { flex: 1; } .scene-heading { display: block; } .scene-status { display: block; margin-top: .7rem; } .scene-stage { aspect-ratio: 4 / 3; } .hotspot-button { font-size: .65rem; } .character-card { padding: .3rem .45rem; font-size: .8rem; } }
+ @media (max-width: 600px) { .game-header { align-items: flex-start; gap: 1rem; flex-direction: column; } .header-actions { width: 100%; } .header-actions button { flex: 1; } .scene-heading { display: block; } .scene-status { display: block; margin-top: .7rem; } .hotspot-button { font-size: .65rem; } .character-card { padding: .3rem .45rem; font-size: .8rem; } }
 @media (max-width: 900px) { .theory-fields { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .theory-fields { grid-template-columns: 1fr; } }
