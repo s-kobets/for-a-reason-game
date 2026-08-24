@@ -1,0 +1,9 @@
+import type { Deduction, Evidence, Language } from '../case/types'
+import { getText, caseUiText } from '../case/translations'
+
+interface NotebookPanelProps { evidence: Evidence[]; deductions: Deduction[]; selectedIds: string[]; language: Language; onSelectEvidence(id: string): void; onDeduction(id: string): void }
+
+export function NotebookPanel({ evidence, deductions, selectedIds, language, onSelectEvidence, onDeduction }: NotebookPanelProps) {
+  const groups: [string, Evidence['kind']][] = [[getText(caseUiText.observations, language), 'observation'], [getText(caseUiText.statements, language), 'statement']]
+  return <section className="notebook-panel" aria-labelledby="notebook-title"><div className="panel-title"><h2 id="notebook-title">{getText(caseUiText.notebook, language)}</h2><span>{selectedIds.length} {getText(caseUiText.selectedCount, language)}</span></div>{groups.map(([title, kind]) => <div className="evidence-group" key={kind}><h3>{title}</h3>{evidence.filter((item) => item.kind === kind).map((item) => <button key={item.id} type="button" className={selectedIds.includes(item.id) ? 'evidence-item selected' : 'evidence-item'} onClick={() => onSelectEvidence(item.id)}><span className="evidence-mark" aria-hidden="true">{kind === 'observation' ? '↗' : '“'}</span>{getText(item.text, language)}</button>)}{!evidence.some((item) => item.kind === kind) && <p className="empty-state">{getText(caseUiText.noEvidence, language)}</p>}</div>)}<div className="evidence-group"><h3>{getText(caseUiText.deductions, language)}</h3>{deductions.map((deduction) => <button key={deduction.id} type="button" className="deduction-item" onClick={() => onDeduction(deduction.id)}><strong>{getText(deduction.title, language)}</strong><span>{getText(deduction.text, language)}</span></button>)}</div></section>
+}
