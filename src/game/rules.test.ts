@@ -48,7 +48,7 @@ describe('investigation rules', () => {
   });
 
   it('unlocks contradiction only after its statement and evidence are found', () => {
-    let state = gameReducer(initialGameState, { type: 'addStatement', statementId: 'petya-denies-garden' });
+    let state = gameReducer(initialGameState, { type: 'askQuestion', questionId: 'ask-petya-garden' });
     expect(canPresentContradiction(state)).toBe(false);
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'garden-path' });
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'scarf-thread' });
@@ -64,7 +64,8 @@ describe('investigation rules', () => {
     expect(gameReducer(initialGameState, { type: 'unlockLocation', locationId: 'shed' })).toBe(initialGameState);
     const eligible = { ...initialGameState, receivedStatementIds: ['petya-admits-shed'] };
     expect(gameReducer(eligible, { type: 'unlockLocation', locationId: 'shed' }).openedLocationIds).toContain('shed');
-    const once = gameReducer(initialGameState, { type: 'addStatement', statementId: 'petya-admits-shed' });
+    const producerState = { ...initialGameState, askedQuestionIds: ['ask-petya-cake'] };
+    const once = gameReducer(producerState, { type: 'addStatement', statementId: 'petya-admits-shed' });
     const twice = gameReducer(once, { type: 'addStatement', statementId: 'petya-admits-shed' });
 
     expect(once.openedLocationIds).toContain('shed');
@@ -97,9 +98,18 @@ describe('investigation rules', () => {
 
   it('rejects invalid direct actions and unopened locations', () => {
     expect(gameReducer(initialGameState, { type: 'addStatement', statementId: 'unknown' })).toBe(initialGameState);
+    expect(gameReducer(initialGameState, { type: 'addStatement', statementId: 'anya-saw-petya' })).toBe(initialGameState);
     expect(gameReducer(initialGameState, { type: 'selectEvidence', evidenceId: 'shed-frosting' })).toBe(initialGameState);
     expect(gameReducer(initialGameState, { type: 'setLocation', locationId: 'shed' })).toBe(initialGameState);
     expect(gameReducer(initialGameState, { type: 'setLocation', locationId: 'unknown' })).toBe(initialGameState);
+  });
+
+  it('does not let direct addStatement inject statement-backed evidence', () => {
+    const injected = gameReducer(initialGameState, { type: 'addStatement', statementId: 'anya-saw-petya' });
+    expect(injected.receivedStatementIds).not.toContain('anya-saw-petya');
+    expect(acquiredEvidenceIds(injected)).not.toContain('anya-saw-petya');
+    const produced = gameReducer({ ...initialGameState, askedQuestionIds: ['ask-anya-before'] }, { type: 'addStatement', statementId: 'anya-saw-petya' });
+    expect(produced.receivedStatementIds).toContain('anya-saw-petya');
   });
 
   it('isolates fresh and reset state containers', () => {

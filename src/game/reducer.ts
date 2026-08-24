@@ -46,7 +46,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     }
     case 'addStatement':
-      if (!missingCakeCase.statements.some(({ id }) => id === action.statementId)) return state;
+      if (!missingCakeCase.statements.some(({ id }) => id === action.statementId)
+        || state.receivedStatementIds.includes(action.statementId)
+        || !missingCakeCase.characters.some(({ questions }) => questions.some((question) => state.askedQuestionIds.includes(question.id) && question.responseStatementIds.includes(action.statementId)))) return state;
       next = { ...state, receivedStatementIds: add(state.receivedStatementIds, action.statementId) };
       break;
     case 'unlockLocation':

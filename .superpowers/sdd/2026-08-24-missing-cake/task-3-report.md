@@ -61,3 +61,21 @@
 ### Remaining Concerns
 
 - Generated `dist/`, `node_modules/`, and `tsconfig.tsbuildinfo` remain untracked and excluded from fixes commits.
+
+## Re-review P1 Fix Report
+
+- `addStatement` now accepts only a known statement whose producing question is already present in `askedQuestionIds`.
+- Initial statements remain available through their normal dialogue response, and later UI can safely call `addStatement` after a question has produced the response.
+- Contradiction statements remain produced only by `presentContradiction`.
+- Added regression coverage proving direct injection of `anya-saw-petya` does not acquire statement-backed evidence, while the producing-question path remains valid.
+
+### Exact Verification
+
+- `rtk npm test -- --run src/game/rules.test.ts`: PASS, 26 tests.
+- `rtk npm test -- --run`: PASS, 32 tests across 2 files.
+- `rtk npm run typecheck`: PASS.
+- `rtk npm run build`: PASS; Vite production bundle generated.
+
+### Concerns
+
+- Generated `dist/`, `node_modules/`, and `tsconfig.tsbuildinfo` remain untracked and excluded from the fix commit.
