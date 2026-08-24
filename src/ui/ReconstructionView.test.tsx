@@ -17,11 +17,23 @@ describe('ReconstructionView', () => {
 
   it('shows final understood state on last step', () => {
     const onReplay = vi.fn()
-    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={4} language="en" onNext={vi.fn()} onReplay={onReplay} />)
+    const onNext = vi.fn()
+    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={missingCakeCase.reconstruction.length - 1} language="en" onNext={onNext} onReplay={onReplay} />)
 
     expect(screen.getByRole('status').textContent).toMatch(/case understood/i)
     expect(screen.queryByRole('button', { name: 'Next' })).toBeNull()
+    expect(screen.getByRole('img', { name: missingCakeCase.reconstruction.at(-1)!.text.en })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Replay' }))
     expect(onReplay).toHaveBeenCalledOnce()
+    expect(onNext).not.toHaveBeenCalled()
+  })
+
+  it('renders distinct mapped vignette content for each scene ID', () => {
+    const markup = missingCakeCase.reconstruction.map((step, currentStep) => {
+      const { container } = render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={currentStep} language="en" onNext={vi.fn()} onReplay={vi.fn()} />)
+      return [step.sceneId, container.querySelector('svg')?.innerHTML]
+    })
+
+    expect(new Set(markup.map(([, content]) => content)).size).toBe(missingCakeCase.reconstruction.length)
   })
 })

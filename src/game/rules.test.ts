@@ -102,6 +102,8 @@ describe('investigation rules', () => {
     expect(gameReducer(initialGameState, { type: 'selectEvidence', evidenceId: 'shed-frosting' })).toBe(initialGameState);
     expect(gameReducer(initialGameState, { type: 'setLocation', locationId: 'shed' })).toBe(initialGameState);
     expect(gameReducer(initialGameState, { type: 'setLocation', locationId: 'unknown' })).toBe(initialGameState);
+    expect(gameReducer(initialGameState, { type: 'setReconstructionStep', step: missingCakeCase.reconstruction.length })).toBe(initialGameState);
+    expect(gameReducer(initialGameState, { type: 'setReconstructionStep', step: -1 })).toBe(initialGameState);
   });
 
   it('does not let direct addStatement inject statement-backed evidence', () => {

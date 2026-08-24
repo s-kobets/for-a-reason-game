@@ -123,6 +123,7 @@ h1 {
 .theory-fields label { display: grid; gap: .35rem; color: #694739; font-size: .85rem; font-weight: 700; }
 .theory-fields select { width: 100%; min-height: 2.6rem; border: 1px solid #d6c4b3; border-radius: .65rem; padding: .45rem; color: #30271f; background: #fffaf3; font: inherit; }
 .theory-submit, .reconstruction-next, .reconstruction-final button { margin-left: 1rem; border: 0; border-radius: 999px; padding: .6rem 1rem; color: #fffaf3; background: #8b5e4b; cursor: pointer; }
+.theory-fields select:focus-visible, .theory-submit:focus-visible, .reconstruction-next:focus-visible, .reconstruction-final button:focus-visible { outline: 3px solid #f9cf7c; outline-offset: 3px; }
 .theory-feedback { margin: 1rem 1rem 0; padding: .7rem .8rem; border-radius: .6rem; }
 .theory-wrong { color: #70402d; background: #fff0dd; }
 .theory-partial { color: #694739; background: #f8e4bd; }

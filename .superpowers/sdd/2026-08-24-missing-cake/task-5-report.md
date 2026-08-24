@@ -24,3 +24,12 @@ Implemented theory flow and sequential reconstruction.
 
 - Feedback result is transient UI state; persisted theory and reconstruction position remain handled by existing versioned storage.
 - Reconstruction vignette is intentionally minimal inline SVG, using each case step's scene ID for stable identity without adding assets.
+
+## Review Fixes
+
+- Added GameShell integration harness coverage for wrong, partial, and complete submissions, retry clearing, evidence preservation, dispatched theory/reconstruction actions, next/replay, and completed-state reconstruction loaded at a persisted step.
+- Added reducer boundary assertions for negative and `reconstruction.length` steps.
+- Replaced generic reconstruction artwork with explicit scene ID to SVG vignette mapping for all five steps.
+- Changed SVG accessible names from timestamps to localized reconstruction text and tested the contract.
+- Expanded theory tests to cover all five field updates, option counts, Russian labels, and translated options.
+- Added visible `:focus-visible` styling for selects and reconstruction/theory controls.
