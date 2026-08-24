@@ -1,0 +1,93 @@
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #30271f;
+  background: #f7f1e8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+.game-shell {
+  display: grid;
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  background: radial-gradient(circle at 50% 15%, #fffaf3 0, #f7f1e8 58%, #e9ddcf 100%);
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-self: start;
+  max-width: 72rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  color: #8b5e4b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.language-toggle {
+  border: 1px solid #d6c4b3;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  color: #694739;
+  background: transparent;
+  cursor: pointer;
+}
+
+.welcome-card {
+  align-self: center;
+  justify-self: center;
+  max-width: 34rem;
+  padding: clamp(2rem, 7vw, 5rem) 1.5rem;
+  text-align: center;
+}
+
+.cake-mark {
+  margin: 0 0 1rem;
+  font-size: clamp(3rem, 10vw, 5rem);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 400;
+  line-height: 0.95;
+}
+
+.intro {
+  margin: 1.5rem auto 2rem;
+  max-width: 28rem;
+  color: #705e53;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.6;
+}
+
+.start-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.8rem 1.4rem;
+  color: #fffaf3;
+  background: #8b5e4b;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
