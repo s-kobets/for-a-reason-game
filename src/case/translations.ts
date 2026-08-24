@@ -51,4 +51,12 @@ export const caseUiText = {
   next: { en: 'Next', ru: 'Далее' },
   replay: { en: 'Replay', ru: 'Повторить' },
   caseUnderstood: { en: 'Case understood', ru: 'Дело раскрыто' },
+  saved: { en: 'Saved', ru: 'Сохранено' },
+  saveInMemory: { en: 'Saved in memory only', ru: 'Сохранено только в памяти' },
+  reset: { en: 'Reset case', ru: 'Начать заново' },
+  resetTitle: { en: 'Reset case?', ru: 'Начать расследование заново?' },
+  resetPrompt: { en: 'All investigation progress will be lost.', ru: 'Весь прогресс расследования будет потерян.' },
+  confirmReset: { en: 'Reset', ru: 'Сбросить' },
+  cancel: { en: 'Cancel', ru: 'Отмена' },
+  selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

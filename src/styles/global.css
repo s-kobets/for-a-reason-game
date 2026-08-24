@@ -20,6 +20,11 @@ button {
   font: inherit;
 }
 
+button:focus-visible, select:focus-visible {
+  outline: 3px solid #f9cf7c;
+  outline-offset: 3px;
+}
+
 .game-shell {
   display: grid;
   min-height: 100vh;
@@ -96,6 +101,8 @@ h1 {
 .game-header { max-width: none; margin-bottom: 1.5rem; }
 .case-title { margin: .15rem 0 0; font-size: clamp(1.7rem, 4vw, 3rem); line-height: 1; }
 .header-actions, .scene-actions { display: flex; gap: .55rem; align-items: center; }
+.save-indicator { color: #31532e; font-size: .8rem; font-weight: 700; }
+.save-memory { color: #70402d; }
 .header-actions button, .scene-actions button, .mobile-panel button, .evidence-dialog button { border: 1px solid #d6c4b3; border-radius: 999px; padding: .55rem .85rem; color: #694739; background: #fffaf3; cursor: pointer; }
 .game-layout { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 1.25rem; align-items: start; }
 .scene-card, .map-panel, .notebook-panel { border: 1px solid #e0cdbb; border-radius: 1.25rem; background: rgba(255, 250, 243, .8); box-shadow: 0 18px 45px rgba(91, 58, 39, .1); }
@@ -145,6 +152,7 @@ h1 {
 .evidence-item.selected { border-color: #8b5e4b; background: #f8e4bd; }
 .evidence-item[aria-pressed="true"] { box-shadow: inset 4px 0 #8b5e4b; }
 .evidence-mark { color: #8b5e4b; font-weight: 700; }
+.selected-marker { color: #694739; font-size: .72rem; font-weight: 700; text-transform: uppercase; }
 .deduction-item { display: grid; gap: .35rem; background: #f8efe3; }
 .deduction-item.completed { background: #e4f0dc; }
 .deduction-item button { justify-self: start; border: 1px solid #8b5e4b; border-radius: 999px; padding: .35rem .7rem; color: #fffaf3; background: #8b5e4b; cursor: pointer; }
@@ -154,6 +162,11 @@ h1 {
 .empty-state { color: #8b7669; font-style: italic; }
 .overlay { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; padding: 1rem; background: rgba(48,39,31,.45); }
 .dialogue-panel, .evidence-dialog { position: relative; width: min(100%, 34rem); max-width: 34rem; padding: 2rem; border-radius: 1.25rem; background: #fffaf3; box-shadow: 0 20px 70px rgba(48,39,31,.3); }
+.confirm-dialog { width: min(100%, 28rem); padding: 2rem; border-radius: 1.25rem; background: #fffaf3; box-shadow: 0 20px 70px rgba(48,39,31,.3); }
+.confirm-dialog h2 { margin-top: 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1.5rem; }
+.dialog-actions button { border: 1px solid #d6c4b3; border-radius: 999px; padding: .55rem .85rem; color: #694739; background: #fffaf3; cursor: pointer; }
+.dialog-actions .danger-button { color: #fffaf3; background: #8b5e4b; }
 .close-button { position: absolute; top: 1rem; right: 1rem; border: 0; color: #694739; background: transparent; cursor: pointer; }
 .dialogue-portrait { width: 4rem; height: 4rem; margin: 1rem 0; font-size: 1.7rem; }
 .dialogue-intro { color: #705e53; }
@@ -169,7 +182,7 @@ h1 {
 .false-lead { padding: .8rem; border-radius: .6rem; color: #705e53; background: #f8efe3; }
 .mobile-panel-overlay { display: none; }
 .panel-close-button { display: block; margin: .8rem .9rem 0 auto; border: 1px solid #d6c4b3; border-radius: 999px; padding: .45rem .7rem; color: #694739; background: #fffaf3; cursor: pointer; }
-@media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } .sidebar { display: none; } .mobile-panel-overlay { position: fixed; inset: 0; z-index: 4; display: grid; place-items: start center; padding: 5rem 1rem 1rem; background: rgba(48,39,31,.45); } .mobile-panel { width: min(100%, 34rem); max-height: 100%; overflow: auto; } }
+ @media (max-width: 900px) { .game-layout { grid-template-columns: 1fr; } .sidebar { display: grid; } .mobile-panel-overlay { position: fixed; inset: 0; z-index: 4; display: grid; place-items: start center; padding: 5rem 1rem 1rem; background: rgba(48,39,31,.45); } .mobile-panel { width: min(100%, 34rem); max-height: 100%; overflow: auto; } }
 @media (max-width: 600px) { .game-header { align-items: flex-start; gap: 1rem; flex-direction: column; } .header-actions { width: 100%; } .header-actions button { flex: 1; } .scene-heading { display: block; } .scene-status { display: block; margin-top: .7rem; } .scene-stage { aspect-ratio: 4 / 3; } .hotspot-button { font-size: .65rem; } .character-card { padding: .3rem .45rem; font-size: .8rem; } }
 @media (max-width: 900px) { .theory-fields { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .theory-fields { grid-template-columns: 1fr; } }

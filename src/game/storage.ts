@@ -70,10 +70,12 @@ export function loadGame(): GameState {
   }
 }
 
-export function saveGame(state: GameState): void {
+export function saveGame(state: GameState): 'saved' | 'memory' {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, state }));
+    return 'saved';
   } catch {
     // Storage can be blocked by browser privacy settings; gameplay stays in memory.
+    return 'memory';
   }
 }
