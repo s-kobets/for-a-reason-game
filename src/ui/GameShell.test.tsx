@@ -153,6 +153,53 @@ describe('GameShell', () => {
     expect(screen.queryByRole('dialog', { name: 'Map' })).toBeNull()
   })
 
+  it('restores focus to reset trigger after Cancel and Escape', async () => {
+    renderGame()
+    const resetTrigger = screen.getByRole('button', { name: 'Reset case' })
+
+    fireEvent.click(resetTrigger)
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Cancel' })))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => expect(document.activeElement).toBe(resetTrigger))
+
+    fireEvent.click(resetTrigger)
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Cancel' })))
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await waitFor(() => expect(document.activeElement).toBe(resetTrigger))
+  })
+
+  it('wraps Tab within mobile, detail, and dialogue dialogs', async () => {
+    renderGame()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Notebook' }))
+    const notebookDialog = screen.getByRole('dialog', { name: 'Notebook' })
+    const notebookButtons = notebookDialog.querySelectorAll('button')
+    notebookButtons[notebookButtons.length - 1].focus()
+    fireEvent.keyDown(notebookButtons[notebookButtons.length - 1], { key: 'Tab' })
+    expect(document.activeElement).toBe(notebookButtons[0])
+    fireEvent.keyDown(notebookButtons[0], { key: 'Tab', shiftKey: true })
+    expect(document.activeElement).toBe(notebookButtons[notebookButtons.length - 1])
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    const hotspot = screen.getByRole('button', { name: /Empty cake stand/ })
+    fireEvent.click(hotspot)
+    const detailDialog = screen.getByRole('dialog', { name: 'Empty cake stand' })
+    const detailButtons = detailDialog.querySelectorAll('button')
+    detailButtons[detailButtons.length - 1].focus()
+    fireEvent.keyDown(detailButtons[detailButtons.length - 1], { key: 'Tab' })
+    expect(document.activeElement).toBe(detailButtons[0])
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    const character = document.getElementById('character-petya')!
+    fireEvent.click(character)
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' })))
+    const dialogueDialog = screen.getByRole('dialog', { name: 'Petya' })
+    const dialogueButtons = dialogueDialog.querySelectorAll('button')
+    dialogueButtons[dialogueButtons.length - 1].focus()
+    fireEvent.keyDown(dialogueButtons[dialogueButtons.length - 1], { key: 'Tab' })
+    expect(document.activeElement).toBe(dialogueButtons[0])
+  })
+
   it('renders Russian labels after language switch', () => {
     renderGame()
 

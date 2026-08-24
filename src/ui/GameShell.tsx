@@ -10,6 +10,7 @@ import { NotebookPanel } from './NotebookPanel'
 import { SceneView } from './SceneView'
 import { ReconstructionView } from './ReconstructionView'
 import { TheoryPanel, type TheoryResult } from './TheoryPanel'
+import { FocusBoundary } from './FocusBoundary'
 
 interface GameShellProps { caseData: CaseDefinition; state: GameState; dispatch: Dispatch<GameAction>; saveStatus?: 'saved' | 'memory'; saveStatusText?: typeof caseUiText.saved }
 
@@ -47,7 +48,7 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
-      if (resetOpen) setResetOpen(false)
+      if (resetOpen) closeReset()
       else if (detail) closeDetail()
       else if (character) closeDialogue()
       else if (panel) closePanel()
@@ -69,6 +70,10 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
     setDetail(undefined)
     window.setTimeout(() => focusAfterDetailRef.current?.focus(), 0)
   }
+  const closeReset = () => {
+    setResetOpen(false)
+    window.setTimeout(() => resetTriggerRef.current?.focus(), 0)
+  }
   const openCharacter = (nextCharacter: Character) => {
     focusAfterDialogueRef.current = document.activeElement as HTMLElement
     setCharacter(nextCharacter)
@@ -82,8 +87,7 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
   const resetGame = () => {
     dispatch({ type: 'reset' })
     setTheoryResult(null)
-    setResetOpen(false)
-    window.setTimeout(() => resetTriggerRef.current?.focus(), 0)
+    closeReset()
   }
   const handleDeduction = (deductionId: string) => {
     const deduction = caseData.deductions.find(({ id }) => id === deductionId)
@@ -117,9 +121,9 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
     <div className="game-layout"><SceneView location={location} state={state} hotspots={hotspots} characters={characters} onAction={dispatch} onHotspot={handleHotspot} onCharacter={openCharacter} /><aside className="sidebar"><MapPanel locations={mobileLocations} language={state.language} currentLocationId={location.id} onSelectLocation={(locationId) => dispatch({ type: 'setLocation', locationId })} /><NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} /></aside></div>
     <TheoryPanel theory={state.theory} solution={caseData.solution} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
     {theoryResult === 'complete' && <ReconstructionView steps={caseData.reconstruction} currentStep={state.reconstructionStep} language={state.language} onNext={() => dispatch({ type: 'setReconstructionStep', step: state.reconstructionStep + 1 })} onReplay={() => dispatch({ type: 'setReconstructionStep', step: 0 })} />}
-    {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />}</section></div>}
+    {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><FocusBoundary><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />}</section></FocusBoundary></div>}
     <DialoguePanel character={character} questions={questions} statements={responses} contradiction={caseData.contradiction} contradictionEvidence={contradictionEvidence} language={state.language} contradictionAvailable={contradictionAvailable} closeRef={dialogueCloseRef} onAsk={(questionId) => dispatch({ type: 'askQuestion', questionId })} onContradiction={() => dispatch({ type: 'presentContradiction' })} onClose={closeDialogue} />
-    {detail && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail() }}><section className="evidence-dialog" role="dialog" aria-modal="true" aria-labelledby={`evidence-title-${detail.id}`} aria-describedby={`evidence-description-${detail.id}`}><button ref={detailCloseRef} className="close-button" type="button" onClick={closeDetail}>{getText(caseUiText.close, state.language)}</button><p className="eyebrow">{getText(caseUiText.evidence, state.language)}</p><h2 id={`evidence-title-${detail.id}`}>{getText(detail.title, state.language)}</h2><p id={`evidence-description-${detail.id}`}>{detailDescription}</p>{detail.falseLead && <p className="false-lead">{getText(detail.falseLead, state.language)}</p>}<button type="button" onClick={closeDetail}>{getText(caseUiText.notebook, state.language)}</button></section></div>}
-    {resetOpen && <div className="overlay" role="presentation"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-description"><h2 id="reset-title">{getText(caseUiText.resetTitle, state.language)}</h2><p id="reset-description">{getText(caseUiText.resetPrompt, state.language)}</p><div className="dialog-actions"><button ref={resetCloseRef} type="button" onClick={() => setResetOpen(false)}>{getText(caseUiText.cancel, state.language)}</button><button className="danger-button" type="button" onClick={resetGame}>{getText(caseUiText.confirmReset, state.language)}</button></div></section></div>}
+    {detail && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDetail() }}><FocusBoundary><section className="evidence-dialog" role="dialog" aria-modal="true" aria-labelledby={`evidence-title-${detail.id}`} aria-describedby={`evidence-description-${detail.id}`}><button ref={detailCloseRef} className="close-button" type="button" onClick={closeDetail}>{getText(caseUiText.close, state.language)}</button><p className="eyebrow">{getText(caseUiText.evidence, state.language)}</p><h2 id={`evidence-title-${detail.id}`}>{getText(detail.title, state.language)}</h2><p id={`evidence-description-${detail.id}`}>{detailDescription}</p>{detail.falseLead && <p className="false-lead">{getText(detail.falseLead, state.language)}</p>}<button type="button" onClick={closeDetail}>{getText(caseUiText.notebook, state.language)}</button></section></FocusBoundary></div>}
+    {resetOpen && <div className="overlay" role="presentation"><FocusBoundary><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-title" aria-describedby="reset-description"><h2 id="reset-title">{getText(caseUiText.resetTitle, state.language)}</h2><p id="reset-description">{getText(caseUiText.resetPrompt, state.language)}</p><div className="dialog-actions"><button ref={resetCloseRef} type="button" onClick={closeReset}>{getText(caseUiText.cancel, state.language)}</button><button className="danger-button" type="button" onClick={resetGame}>{getText(caseUiText.confirmReset, state.language)}</button></div></section></FocusBoundary></div>}
   </main>
 }
