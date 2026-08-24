@@ -1,20 +1,61 @@
 import { missingCakeCase } from '../case/missingCake';
+import type { Theory } from './state';
 import { freshGameState, type GameState } from './state';
+import { acquiredEvidenceIds } from './rules';
 
 export const STORAGE_KEY = 'missing-cake-game-v1';
 const STORAGE_VERSION = 1;
 
+const theoryFields = ['person', 'origin', 'entryMethod', 'event', 'motive'] as const;
+
+function hasUniqueKnownIds(ids: unknown, validIds: Set<string>): ids is string[] {
+  return Array.isArray(ids)
+    && ids.every((id) => typeof id === 'string' && validIds.has(id))
+    && new Set(ids).size === ids.length;
+}
+
+function validTheory(theory: unknown): theory is Theory {
+  if (!theory || typeof theory !== 'object') return false;
+  return theoryFields.every((field) => {
+    const value = (theory as Theory)[field];
+    return typeof value === 'string' && (value === '' || missingCakeCase.solution[field].options.some(({ id }) => id === value));
+  });
+}
+
 function isState(value: unknown): value is GameState {
   if (!value || typeof value !== 'object') return false;
   const state = value as Partial<GameState>;
-  const arrays = ['openedLocationIds', 'discoveredHotspotIds', 'askedQuestionIds', 'receivedStatementIds', 'deductionIds', 'selectedEvidenceIds'] as const;
-  return typeof state.locationId === 'string'
-    && missingCakeCase.locations.some(({ id }) => id === state.locationId)
-    && arrays.every((key) => Array.isArray(state[key]) && state[key].every((id) => typeof id === 'string'))
-    && !!state.theory && typeof state.theory === 'object'
-    && (['person', 'origin', 'entryMethod', 'event', 'motive'] as const).every((key) => typeof state.theory?.[key] === 'string')
-    && (state.language === 'en' || state.language === 'ru')
-    && typeof state.reconstructionStep === 'number' && Number.isInteger(state.reconstructionStep);
+  const locationIds = new Set(missingCakeCase.locations.map(({ id }) => id));
+  const hotspotIds = new Set(missingCakeCase.hotspots.map(({ id }) => id));
+  const questionIds = new Set(missingCakeCase.characters.flatMap(({ questions }) => questions.map(({ id }) => id)));
+  const statementIds = new Set(missingCakeCase.statements.map(({ id }) => id));
+  const deductionIds = new Set(missingCakeCase.deductions.map(({ id }) => id));
+  const evidenceIds = new Set(missingCakeCase.evidence.map(({ id }) => id));
+  if (typeof state.locationId !== 'string'
+    || !locationIds.has(state.locationId)
+    || !hasUniqueKnownIds(state.openedLocationIds, locationIds)
+    || !hasUniqueKnownIds(state.discoveredHotspotIds, hotspotIds)
+    || !hasUniqueKnownIds(state.askedQuestionIds, questionIds)
+    || !hasUniqueKnownIds(state.receivedStatementIds, statementIds)
+    || !hasUniqueKnownIds(state.deductionIds, deductionIds)
+    || !hasUniqueKnownIds(state.selectedEvidenceIds, evidenceIds)
+    || !state.openedLocationIds.includes(state.locationId)
+    || !validTheory(state.theory)
+    || (state.language !== 'en' && state.language !== 'ru')
+    || typeof state.reconstructionStep !== 'number'
+    || !Number.isInteger(state.reconstructionStep)
+    || state.reconstructionStep < 0
+    || state.reconstructionStep >= missingCakeCase.reconstruction.length) return false;
+
+  const candidate = state as GameState;
+  const acquired = new Set(acquiredEvidenceIds(candidate));
+  if (candidate.selectedEvidenceIds.some((id) => !acquired.has(id))) return false;
+
+  return candidate.openedLocationIds.every((locationId) => {
+    const location = missingCakeCase.locations.find(({ id }) => id === locationId)!;
+    const openedByQuestion = missingCakeCase.characters.some(({ questions }) => questions.some((question) => candidate.askedQuestionIds.includes(question.id) && question.unlockLocationIds?.includes(locationId)));
+    return !location.unlockedBy || openedByQuestion || ({ hotspot: candidate.discoveredHotspotIds, statement: candidate.receivedStatementIds, question: candidate.askedQuestionIds, deduction: candidate.deductionIds }[location.unlockedBy.kind].includes(location.unlockedBy.id));
+  });
 }
 
 export function loadGame(): GameState {

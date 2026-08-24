@@ -38,6 +38,11 @@ export function freshGameState(): GameState {
   return {
     ...initialGameState,
     openedLocationIds: [...initialGameState.openedLocationIds],
+    discoveredHotspotIds: [...initialGameState.discoveredHotspotIds],
+    askedQuestionIds: [...initialGameState.askedQuestionIds],
+    receivedStatementIds: [...initialGameState.receivedStatementIds],
+    deductionIds: [...initialGameState.deductionIds],
+    selectedEvidenceIds: [...initialGameState.selectedEvidenceIds],
     theory: { ...initialGameState.theory },
   };
 }

@@ -1,6 +1,6 @@
 import { missingCakeCase } from '../case/missingCake';
 import type { Language } from '../case/types';
-import { canAsk, canMakeDeduction, canPresentContradiction } from './rules';
+import { acquiredEvidenceIds, canAsk, canMakeDeduction, canPresentContradiction, canUnlockLocation } from './rules';
 import { freshGameState, type GameState, type Theory } from './state';
 
 export type GameAction =
@@ -35,12 +35,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const hotspot = missingCakeCase.hotspots.find(({ id }) => id === action.hotspotId);
       if (!hotspot) return state;
       next = { ...state, discoveredHotspotIds: add(state.discoveredHotspotIds, action.hotspotId) };
-      if (hotspot.observationId) next = { ...next, selectedEvidenceIds: add(next.selectedEvidenceIds, hotspot.observationId) };
       break;
     }
     case 'askQuestion': {
-      const question = missingCakeCase.characters.flatMap(({ questions }) => questions).find(({ id }) => id === action.questionId);
-      if (!question || state.askedQuestionIds.includes(action.questionId) || !canAsk(question, state)) return state;
+      const owner = missingCakeCase.characters.find(({ questions }) => questions.some(({ id }) => id === action.questionId));
+      const question = owner?.questions.find(({ id }) => id === action.questionId);
+      if (!owner || !question || owner.locationId !== state.locationId || state.askedQuestionIds.includes(action.questionId) || !canAsk(question, state)) return state;
       next = { ...state, askedQuestionIds: add(state.askedQuestionIds, action.questionId), receivedStatementIds: question.responseStatementIds.reduce(add, state.receivedStatementIds) };
       next = { ...next, openedLocationIds: [...new Set([...next.openedLocationIds, ...(question.unlockLocationIds ?? [])])] };
       break;
@@ -50,11 +50,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       next = { ...state, receivedStatementIds: add(state.receivedStatementIds, action.statementId) };
       break;
     case 'unlockLocation':
-      if (!missingCakeCase.locations.some(({ id }) => id === action.locationId)) return state;
+      {
+        const location = missingCakeCase.locations.find(({ id }) => id === action.locationId);
+        if (!location || !canUnlockLocation(location, state)) return state;
+      }
       next = { ...state, openedLocationIds: add(state.openedLocationIds, action.locationId) };
       break;
     case 'selectEvidence':
-      if (!missingCakeCase.evidence.some(({ id }) => id === action.evidenceId)) return state;
+      if (!missingCakeCase.evidence.some(({ id }) => id === action.evidenceId) || !acquiredEvidenceIds(state).includes(action.evidenceId)) return state;
       next = { ...state, selectedEvidenceIds: add(state.selectedEvidenceIds, action.evidenceId) };
       break;
     case 'makeDeduction': {
@@ -64,7 +67,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       break;
     }
     case 'presentContradiction':
-      if (!canPresentContradiction(state)) return state;
+      if (!canPresentContradiction(state) || state.receivedStatementIds.includes(missingCakeCase.contradiction.revealedStatementId)) return state;
       next = { ...state, receivedStatementIds: add(state.receivedStatementIds, missingCakeCase.contradiction.revealedStatementId) };
       break;
     case 'setTheory':

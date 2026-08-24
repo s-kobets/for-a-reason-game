@@ -1,5 +1,5 @@
 import { missingCakeCase } from '../case/missingCake';
-import type { Character, Condition, Deduction, Question, CaseSolution } from '../case/types';
+import type { Character, Condition, Deduction, Location, Question, CaseSolution } from '../case/types';
 import type { GameState, Theory } from './state';
 
 function hasCondition(condition: Condition, state: GameState): boolean {
@@ -20,20 +20,32 @@ export function availableQuestions(character: Character, state: GameState): Ques
   return character.questions.filter((question) => !state.askedQuestionIds.includes(question.id) && canAsk(question, state));
 }
 
+export function acquiredEvidenceIds(state: GameState): string[] {
+  const acquired = new Set<string>();
+  for (const hotspotId of state.discoveredHotspotIds) {
+    const observationId = missingCakeCase.hotspots.find(({ id }) => id === hotspotId)?.observationId;
+    if (observationId) acquired.add(observationId);
+  }
+  for (const evidence of missingCakeCase.evidence) {
+    if (evidence.statementId && state.receivedStatementIds.includes(evidence.statementId)) acquired.add(evidence.id);
+  }
+  return [...acquired];
+}
+
 export function canMakeDeduction(deduction: Deduction, state: GameState): boolean {
-  return deduction.requiresEvidenceIds.every((id) => state.selectedEvidenceIds.includes(id));
+  const acquired = new Set(acquiredEvidenceIds(state));
+  return deduction.requiresEvidenceIds.every((id) => acquired.has(id) && state.selectedEvidenceIds.includes(id));
+}
+
+export function canUnlockLocation(location: Location, state: GameState): boolean {
+  return !location.unlockedBy || hasCondition(location.unlockedBy, state);
 }
 
 export function canPresentContradiction(state: GameState): boolean {
   const contradiction = missingCakeCase.contradiction;
-  const observedEvidenceIds = new Set(
-    state.discoveredHotspotIds.flatMap((hotspotId) => {
-      const hotspot = missingCakeCase.hotspots.find(({ id }) => id === hotspotId);
-      return hotspot?.observationId ? [hotspot.observationId] : [];
-    }),
-  );
+  const acquired = new Set(acquiredEvidenceIds(state));
   return state.receivedStatementIds.includes(contradiction.initialStatementId)
-    && contradiction.evidenceIds.every((id) => observedEvidenceIds.has(id));
+    && contradiction.evidenceIds.every((id) => acquired.has(id));
 }
 
 export function scoreTheory(theory: Theory, solution: CaseSolution): 'wrong' | 'partial' | 'complete' {
