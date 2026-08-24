@@ -39,7 +39,7 @@ export function SceneView({ location, state, hotspots, characters, onHotspot, on
         </div>
       </div>
       <div className="scene-actions">
-        <button type="button" onClick={() => setShowHints((visible) => !visible)}>{getText(showHints ? caseUiText.hideInspectionHints : caseUiText.showInspectionHints, state.language)}</button>
+        <button type="button" aria-pressed={showHints} onClick={() => setShowHints((visible) => !visible)}>{getText(showHints ? caseUiText.hideInspectionHints : caseUiText.showInspectionHints, state.language)}</button>
       </div>
     </section>
   )

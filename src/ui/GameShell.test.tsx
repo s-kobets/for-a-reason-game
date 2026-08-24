@@ -9,6 +9,9 @@ import type { GameAction } from '../game/reducer'
 import { GameShell } from './GameShell'
 import { SCENE_ASPECT_RATIO, SCENE_VIEWBOX, sceneHotspotBounds } from './SceneArtwork'
 import { loadGame, saveGame } from '../game/storage'
+import { readFileSync } from 'node:fs'
+
+const globalCss = readFileSync('src/styles/global.css', 'utf8')
 
 function renderGame(state: GameState = freshGameState()) {
   function Harness() {
@@ -61,10 +64,11 @@ describe('GameShell', () => {
   it('makes Inspect reveal hotspot guidance', () => {
     renderGame()
 
-    expect(screen.getByRole('button', { name: 'Show inspection hints' })).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: 'Show inspection hints' }))
+    const toggle = screen.getByRole('button', { name: 'Show inspection hints' })
+    expect(toggle.getAttribute('aria-pressed')).toBe('false')
+    fireEvent.click(toggle)
     expect(document.querySelector('.scene-artwork.inspect-mode')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Hide inspection hints' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Hide inspection hints' }).getAttribute('aria-pressed')).toBe('true')
   })
 
   it('discovers meaningful hotspots but keeps decorative hotspots atmospheric', () => {
@@ -143,6 +147,12 @@ describe('GameShell', () => {
       upperGrid.children[2].getAttribute('data-mobile-order'),
       notebookLayout.getAttribute('data-mobile-order'),
     ]).toEqual(['3', '1', '2', '4'])
+  })
+
+  it('declares desktop theory width and mobile field layout contracts', () => {
+    expect(globalCss).toMatch(/\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
+    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*repeat\(2, 1fr\);/)
+    expect(globalCss).toMatch(/@media \(max-width: 480px\)[^{]*\{[^]*?\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
   })
 
   it('keeps every case hotspot inside its visible scene prop bounds', () => {
