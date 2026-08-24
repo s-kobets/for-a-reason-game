@@ -22,3 +22,24 @@
 - Theory and reconstruction remain intentionally deferred to Task 5.
 - Deduction feedback currently comes from reducer state and notebook styling; dedicated theory/result panels remain outside Task 4.
 - Generated `dist/`, `node_modules/`, and `tsconfig.tsbuildinfo` remain untracked.
+
+## Review Fixes
+
+- Added reducer-backed `toggleEvidence` selection and an explicit `Make deduction` action. `GameShell` derives validity with `canMakeDeduction`, dispatches only valid deductions, and shows generic invalid feedback without revealing deduction text.
+- Added mobile map/notebook dialog wrappers with translated close buttons, backdrop dismissal, Escape handling, unique title IDs, focus entry, and focus restoration.
+- Added stable hotspot and character DOM IDs plus `data-*` identifiers. Decorative hotspots open atmospheric detail only and never dispatch discovery.
+- Replaced generic artwork with scene-specific SVG props for kitchen window/cake stand, living-room sofa/table/umbrella, garden path/lantern, corridor door, and shed/latch/cake.
+- Added dialogue response status, contradiction prompt, required evidence list, and post-contradiction response feedback.
+- Positioned character cards from normalized case placement data.
+- Added focused UI coverage for hotspot behavior, evidence/deduction transitions, dialogue/contradiction flow, localization, stable IDs, mobile dismissal, dialog semantics, and focus restoration.
+
+## Review-Fix Verification
+
+- `rtk npm test -- --run`: PASS, 38 tests across 3 files.
+- `rtk npm run typecheck`: PASS.
+- `rtk npm run build`: PASS.
+
+## Remaining Concerns
+
+- Theory and reconstruction remain deferred to Task 5; no Task 5 interfaces were added or preempted.
+- `toggleEvidence` extends reducer action surface while preserving persisted `selectedEvidenceIds` shape and existing deduction rules.

@@ -27,9 +27,9 @@ export function SceneView({ location, state, hotspots, characters, onAction, onH
       </div>
       <div className="scene-stage">
         <SceneArtwork sceneId={location.sceneId} sceneTitle={location.title} hotspots={hotspots} language={state.language} discoveredHotspotIds={state.discoveredHotspotIds} onHotspot={onHotspot} />
-        <div className="character-strip" aria-label={getText(caseUiText.talkTo, state.language)}>
+        <div className="character-layer" aria-label={getText(caseUiText.talkTo, state.language)}>
           {characters.map((character) => (
-            <button key={character.id} type="button" className="character-card" onClick={() => onCharacter(character)}>
+            <button id={`character-${character.id}`} data-character-id={character.id} key={character.id} type="button" className="character-card" style={{ left: `${character.placement.x * 100}%`, top: `${character.placement.y * 100}%` }} onClick={() => onCharacter(character)}>
               <span className="character-avatar" aria-hidden="true">{character.name.en.slice(0, 1)}</span>
               <span><strong>{getText(character.name, state.language)}</strong><small>{getText(character.role, state.language)}</small></span>
             </button>

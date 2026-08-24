@@ -9,6 +9,7 @@ export type GameAction =
   | { type: 'addStatement'; statementId: string }
   | { type: 'unlockLocation'; locationId: string }
   | { type: 'selectEvidence'; evidenceId: string }
+  | { type: 'toggleEvidence'; evidenceId: string }
   | { type: 'makeDeduction'; deductionId: string }
   | { type: 'presentContradiction' }
   | { type: 'setTheory'; theory: Theory }
@@ -61,6 +62,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'selectEvidence':
       if (!missingCakeCase.evidence.some(({ id }) => id === action.evidenceId) || !acquiredEvidenceIds(state).includes(action.evidenceId)) return state;
       next = { ...state, selectedEvidenceIds: add(state.selectedEvidenceIds, action.evidenceId) };
+      break;
+    case 'toggleEvidence':
+      if (!missingCakeCase.evidence.some(({ id }) => id === action.evidenceId) || !acquiredEvidenceIds(state).includes(action.evidenceId)) return state;
+      next = { ...state, selectedEvidenceIds: state.selectedEvidenceIds.includes(action.evidenceId) ? state.selectedEvidenceIds.filter((id) => id !== action.evidenceId) : add(state.selectedEvidenceIds, action.evidenceId) };
       break;
     case 'makeDeduction': {
       const deduction = missingCakeCase.deductions.find(({ id }) => id === action.deductionId);
