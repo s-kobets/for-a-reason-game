@@ -32,3 +32,28 @@
 - Language toggle and start action are placeholders by design and have no behavior yet.
 - No component tests exist in this bootstrap task; Vitest is configured to accept that until later tasks add them.
 - Generated `node_modules/`, `dist/`, and `tsconfig.tsbuildinfo` remain untracked locally and are excluded from the task commit.
+
+## Review Fix Report
+
+- Moved `@testing-library/jest-dom`, `@testing-library/react`, and `@testing-library/user-event` to `devDependencies`.
+- Pinned all direct package versions and regenerated `package-lock.json`.
+- Added native `disabled` to the non-functional `Coming soon` button.
+
+### Exact Verification
+
+- `rtk npm install`: `up to date, audited 116 packages`; `found 0 vulnerabilities`.
+- `rtk npm run typecheck`: `> tsc --noEmit`; exited 0.
+- `rtk npm run build`: `> tsc -b && vite build`; Vite `8.2.2`; production build completed; exited 0.
+- `rtk npm test`: `> vitest run --passWithNoTests`; Vitest `4.1.11`; `No test files found, exiting with code 0`.
+
+### Fix Self-Review
+
+- Production dependencies now contain only `react` and `react-dom`.
+- Direct dependency declarations match resolved lockfile versions.
+- Disabled button cannot receive keyboard focus or activation.
+- No gameplay, state, or other later-task scope was added.
+
+### Remaining Concerns
+
+- No component tests exist yet; test command intentionally passes with no test files.
+- Local generated `node_modules/`, `dist/`, and `tsconfig.tsbuildinfo` remain untracked.

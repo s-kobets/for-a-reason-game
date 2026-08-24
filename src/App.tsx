@@ -14,7 +14,7 @@ function App() {
         </p>
         <h1 id="game-title">Missing Cake</h1>
         <p className="intro">Something is missing. Follow the clues, question every detail, and find out what happened.</p>
-        <button className="start-button" type="button">
+        <button className="start-button" type="button" disabled>
           Coming soon
         </button>
       </section>
