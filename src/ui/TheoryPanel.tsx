@@ -22,7 +22,7 @@ const fields = [
 ] as const
 
 export function TheoryPanel({ theory, solution, language, result, onChange, onSubmit }: TheoryPanelProps) {
-  return <section className="theory-panel" aria-labelledby="theory-title">
+  return <section className="theory-panel" data-mobile-order="2" aria-labelledby="theory-title">
     <div className="panel-title"><h2 id="theory-title">{getText(caseUiText.theory, language)}</h2></div>
     <div className="theory-fields">
       {fields.map(([field, label]) => <label key={field}>

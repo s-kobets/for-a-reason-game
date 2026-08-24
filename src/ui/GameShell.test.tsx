@@ -125,6 +125,26 @@ describe('GameShell', () => {
     expect(theory.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
+  it('keeps Notebook outside upper grid and declares mobile panel order', () => {
+    renderGame()
+
+    const upperGrid = document.querySelector('.game-layout')!
+    const notebookLayout = document.querySelector('.notebook-layout')!
+
+    expect(upperGrid.children).toHaveLength(3)
+    expect(upperGrid.querySelector('.map-panel')).toBe(upperGrid.children[0])
+    expect(upperGrid.querySelector('.scene-card')).toBe(upperGrid.children[1])
+    expect(upperGrid.querySelector('.theory-panel')).toBe(upperGrid.children[2])
+    expect(notebookLayout.parentElement).toBe(document.querySelector('.game-shell'))
+    expect(notebookLayout.previousElementSibling).toBe(upperGrid)
+    expect([
+      upperGrid.children[0].getAttribute('data-mobile-order'),
+      upperGrid.children[1].getAttribute('data-mobile-order'),
+      upperGrid.children[2].getAttribute('data-mobile-order'),
+      notebookLayout.getAttribute('data-mobile-order'),
+    ]).toEqual(['3', '1', '2', '4'])
+  })
+
   it('keeps every case hotspot inside its visible scene prop bounds', () => {
     for (const hotspot of missingCakeCase.hotspots) {
       const bounds = sceneHotspotBounds[hotspot.id]

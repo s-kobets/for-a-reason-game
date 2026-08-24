@@ -151,7 +151,7 @@ export function GameShell({ caseData, state, dispatch, saveStatus = 'saved', sav
        <SceneView location={location} state={state} hotspots={hotspots} characters={characters} totalClues={totalClues} foundClues={foundClues} onHotspot={handleHotspot} onCharacter={openCharacter} />
        <TheoryPanel theory={state.theory} solution={caseData.solution} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
      </div>
-     <div className="notebook-layout">
+     <div className="notebook-layout" data-mobile-order="4">
        <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} deductionHints={deductionHints} disabledDeductionIds={disabledDeductionIds} />
      </div>
     {theoryResult === 'complete' && <ReconstructionView steps={caseData.reconstruction} currentStep={state.reconstructionStep} language={state.language} onNext={() => dispatch({ type: 'setReconstructionStep', step: state.reconstructionStep + 1 })} onReplay={() => dispatch({ type: 'setReconstructionStep', step: 0 })} />}

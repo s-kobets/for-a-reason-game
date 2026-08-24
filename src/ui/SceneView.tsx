@@ -18,7 +18,7 @@ interface SceneViewProps {
 export function SceneView({ location, state, hotspots, characters, onHotspot, onCharacter, totalClues, foundClues }: SceneViewProps) {
   const [showHints, setShowHints] = useState(false)
   return (
-    <section className="scene-card" aria-labelledby="scene-title">
+    <section className="scene-card" data-mobile-order="1" aria-labelledby="scene-title">
       <div className="scene-heading">
         <div>
           <p className="eyebrow">{getText(caseUiText.inspect, state.language)}</p>
