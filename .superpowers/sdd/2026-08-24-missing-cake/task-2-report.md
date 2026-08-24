@@ -29,3 +29,25 @@
 - `CaseDefinition` uses string IDs intentionally so later reducer/UI tasks can consume stable data without a large generated union type.
 - Dialogue response handling and condition semantics remain for Task 3.
 - Generated `dist/`, `node_modules/`, and `tsconfig.tsbuildinfo` remain untracked and are excluded from this task commit.
+
+## Review Fix Report
+
+### Changes
+
+- Added typed `TheoryOption` catalogs with bilingual labels to every theory solution field; submitted values remain stable IDs.
+- Added normalized `x`/`y` placements to every hotspot and `locationId` plus placement to every character.
+- Added explicit `falseLeadEvidenceIds` provenance for the scarf-thread false lead.
+- Added `statementId` to statement evidence and validated the relation against canonical dialogue statements.
+- Expanded focused tests to cover counts, all localized fields, translation selection, placements, every cross-entity reference category, unlocks, contradiction, deductions, reconstruction, decorative hotspot, false-lead provenance, and theory option values.
+
+### Verification
+
+- `rtk npm test -- --run src/case/missingCake.test.ts`: passed, 6 tests.
+- `rtk npm test -- --run`: passed, 6 tests.
+- `rtk npm run typecheck`: passed.
+- `rtk npm run build`: passed; Vite production bundle generated.
+
+### Remaining Concerns
+
+- Cross-reference checks are focused test invariants rather than runtime validation; later state consumers should continue treating case data as trusted static input.
+- Generated `dist/`, `node_modules/`, and `tsconfig.tsbuildinfo` remain untracked and excluded from the fixes commit.

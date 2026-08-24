@@ -7,6 +7,11 @@ export interface LocalizedText {
   ru: string;
 }
 
+export interface NormalizedPlacement {
+  x: number;
+  y: number;
+}
+
 export interface Condition {
   kind: 'hotspot' | 'statement' | 'question' | 'deduction';
   id: string;
@@ -23,11 +28,13 @@ export interface Location {
 export interface Hotspot {
   id: string;
   locationId: string;
+  placement: NormalizedPlacement;
   title: LocalizedText;
   description: LocalizedText;
   observationId?: string;
   decorative?: boolean;
   falseLead?: LocalizedText;
+  falseLeadEvidenceIds?: string[];
 }
 
 export interface Statement {
@@ -47,6 +54,8 @@ export interface Question {
 
 export interface Character {
   id: string;
+  locationId: string;
+  placement: NormalizedPlacement;
   name: LocalizedText;
   role: LocalizedText;
   questions: Question[];
@@ -56,6 +65,7 @@ export interface Evidence {
   id: string;
   kind: EvidenceKind;
   text: LocalizedText;
+  statementId?: string;
 }
 
 export interface Deduction {
@@ -74,8 +84,14 @@ export interface Contradiction {
   revealedStatementId: string;
 }
 
+export interface TheoryOption {
+  id: string;
+  label: LocalizedText;
+}
+
 export interface SolutionField {
   value: string;
+  options: TheoryOption[];
   evidenceIds: string[];
 }
 
