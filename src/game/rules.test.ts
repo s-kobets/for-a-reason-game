@@ -1,13 +1,19 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { missingCakeCase } from '../case/missingCake';
-import { acquiredEvidenceIds, availableQuestions, canAsk, canPresentContradiction, canMakeDeduction, scoreTheory } from './rules';
-import { freshGameState, initialGameState, type GameState, type Theory } from './state';
-import { gameReducer } from './reducer';
-import { loadGame, saveGame, STORAGE_KEY } from './storage';
+import { canAsk } from './rules';
+import type { GameState, Theory } from './state';
+import { createGameRuntime } from './runtime';
+
+const runtime = createGameRuntime(missingCakeCase);
+const { reducer: gameReducer, freshState: freshGameState, acquiredEvidenceIds, availableQuestions, canMakeDeduction, matchingDeduction, loadGame, saveGame, storageKey: STORAGE_KEY } = runtime;
+const initialGameState = freshGameState();
+const petya = missingCakeCase.characters.find(({ id }) => id === 'petya')!;
+const canPresentContradiction = (state: GameState) => runtime.availableContradictions(petya, state).length > 0;
+const scoreTheory = (theory: Theory) => runtime.scoreTheory(theory);
 
 const completeTheory: Theory = {
   person: 'petya',
-  origin: 'kitchen',
+  origin: 'garden',
   entryMethod: 'window',
   event: 'moved-to-shed',
   motive: 'surprise',
@@ -17,7 +23,9 @@ describe('investigation rules', () => {
   it('requires every evidence item before making a deduction', () => {
     const deduction = missingCakeCase.deductions.find(({ id }) => id === 'window-route')!;
     let state = gameReducer(initialGameState, { type: 'discoverHotspot', hotspotId: 'kitchen-window' });
+    state = gameReducer(state, { type: 'setLocation', locationId: 'corridor' });
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'back-door' });
+    state = gameReducer(state, { type: 'setLocation', locationId: 'kitchen' });
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'muddy-footprints' });
     state = gameReducer(state, { type: 'selectEvidence', evidenceId: 'window-open' });
     state = gameReducer(state, { type: 'selectEvidence', evidenceId: 'door-unused' });
@@ -26,6 +34,17 @@ describe('investigation rules', () => {
     state = gameReducer(state, { type: 'selectEvidence', evidenceId: 'footprints-inward' });
     expect(canMakeDeduction(deduction, state)).toBe(true);
     expect(missingCakeCase.deductions.every((item) => canMakeDeduction(item, { ...state, selectedEvidenceIds: [] }))).toBe(false);
+  });
+
+  it('matches a non-first unresolved deduction without re-solving it', () => {
+    const state = {
+      ...initialGameState,
+      discoveredHotspotIds: ['kitchen-window', 'muddy-footprints', 'back-door'],
+      selectedEvidenceIds: ['window-open', 'footprints-inward', 'door-unused'],
+    };
+
+    expect(matchingDeduction(state)?.id).toBe('window-route');
+    expect(matchingDeduction({ ...state, deductionIds: ['window-route'] })).toBeUndefined();
   });
 
   it('keeps acquired evidence separate from explicit selection', () => {
@@ -42,7 +61,7 @@ describe('investigation rules', () => {
     const question = petya.questions.find(({ id }) => id === 'ask-petya-cake')!;
 
     expect(canAsk(question, initialGameState)).toBe(false);
-    const state = { ...initialGameState, deductionIds: ['petya-likely-took-cake'] };
+    const state = { ...initialGameState, deductionIds: ['petya-likely-took-cake'], receivedStatementIds: ['petya-admits-window'] };
     expect(canAsk(question, state)).toBe(true);
     expect(availableQuestions(petya, state).map(({ id }) => id)).toContain('ask-petya-cake');
   });
@@ -50,14 +69,17 @@ describe('investigation rules', () => {
   it('unlocks contradiction only after its statement and evidence are found', () => {
     let state = gameReducer(initialGameState, { type: 'askQuestion', questionId: 'ask-petya-garden' });
     expect(canPresentContradiction(state)).toBe(false);
+    state = gameReducer(state, { type: 'setLocation', locationId: 'garden' });
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'garden-path' });
+    state = gameReducer(state, { type: 'setLocation', locationId: 'corridor' });
     state = gameReducer(state, { type: 'discoverHotspot', hotspotId: 'scarf-thread' });
     expect(state.discoveredHotspotIds).toEqual(['garden-path', 'scarf-thread']);
     expect(state.receivedStatementIds).toContain('petya-denies-garden');
     expect(canPresentContradiction(state)).toBe(true);
-    state = gameReducer(state, { type: 'presentContradiction' });
+    state = gameReducer(state, { type: 'setLocation', locationId: 'kitchen' });
+    state = gameReducer(state, { type: 'presentContradiction', contradictionId: 'petya-garden-contradiction' });
     expect(state.receivedStatementIds).toContain('petya-admits-window');
-    expect(gameReducer(state, { type: 'presentContradiction' })).toBe(state);
+    expect(gameReducer(state, { type: 'presentContradiction', contradictionId: 'petya-garden-contradiction' })).toBe(state);
   });
 
   it('unlocks Shed from Petya admission and deduplicates IDs', () => {
@@ -75,9 +97,9 @@ describe('investigation rules', () => {
   });
 
   it('scores theories as wrong, partial, or complete', () => {
-    expect(scoreTheory({ person: 'anya', origin: 'garden', entryMethod: 'back-door', event: 'ate-it', motive: 'prank' }, missingCakeCase.solution)).toBe('wrong');
-    expect(scoreTheory({ ...completeTheory, motive: 'prank' }, missingCakeCase.solution)).toBe('partial');
-    expect(scoreTheory(completeTheory, missingCakeCase.solution)).toBe('complete');
+    expect(scoreTheory({ person: 'anya', origin: 'kitchen', entryMethod: 'back-door', event: 'ate-it', motive: 'prank' })).toBe('wrong');
+    expect(scoreTheory({ ...completeTheory, motive: 'prank' })).toBe('partial');
+    expect(scoreTheory(completeTheory)).toBe('complete');
   });
 
   it('does not mutate prior state when reducing', () => {
@@ -153,7 +175,7 @@ describe('game storage', () => {
     ['negative reconstruction step', { reconstructionStep: -1 }],
   ])('rejects %s persisted state', (_, patch) => {
     const state = { ...initialGameState, ...patch } as GameState;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, state }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, state }));
     expect(loadGame()).toEqual(initialGameState);
   });
 

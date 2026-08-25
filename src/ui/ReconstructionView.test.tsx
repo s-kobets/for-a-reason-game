@@ -8,7 +8,7 @@ describe('ReconstructionView', () => {
   it('advances one step and replays from the beginning', () => {
     const onNext = vi.fn()
     const onReplay = vi.fn()
-    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={0} language="en" onNext={onNext} onReplay={onReplay} />)
+    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={0} language="en" renderScene={missingCakeCase.renderReconstruction} onNext={onNext} onReplay={onReplay} />)
 
     expect(screen.getByText('After the rain, Petya crosses the garden with a secret plan.')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
@@ -18,7 +18,7 @@ describe('ReconstructionView', () => {
   it('shows final understood state on last step', () => {
     const onReplay = vi.fn()
     const onNext = vi.fn()
-    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={missingCakeCase.reconstruction.length - 1} language="en" onNext={onNext} onReplay={onReplay} />)
+    render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={missingCakeCase.reconstruction.length - 1} language="en" renderScene={missingCakeCase.renderReconstruction} onNext={onNext} onReplay={onReplay} />)
 
     expect(screen.getByRole('status').textContent).toMatch(/case understood/i)
     expect(screen.queryByRole('button', { name: 'Next' })).toBeNull()
@@ -30,7 +30,7 @@ describe('ReconstructionView', () => {
 
   it('renders distinct mapped vignette content for each scene ID', () => {
     const markup = missingCakeCase.reconstruction.map((step, currentStep) => {
-      const { container } = render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={currentStep} language="en" onNext={vi.fn()} onReplay={vi.fn()} />)
+      const { container } = render(<ReconstructionView steps={missingCakeCase.reconstruction} currentStep={currentStep} language="en" renderScene={missingCakeCase.renderReconstruction} onNext={vi.fn()} onReplay={vi.fn()} />)
       return [step.sceneId, container.querySelector('svg')?.innerHTML]
     })
 

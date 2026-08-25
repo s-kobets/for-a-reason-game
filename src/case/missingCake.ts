@@ -1,4 +1,19 @@
 import type { CaseDefinition } from './types';
+import { renderMissingCakeReconstruction, renderMissingCakeScene } from './missingCakeArtwork';
+
+const locationNames = {
+  kitchen: { en: 'Kitchen', ru: 'Кухня' },
+  'living-room': { en: 'Living Room', ru: 'Гостиная' },
+  garden: { en: 'Garden', ru: 'Сад' },
+  corridor: { en: 'Corridor', ru: 'Коридор' },
+  shed: { en: 'Shed', ru: 'Сарай' },
+};
+const characterNames = {
+  petya: { en: 'Petya', ru: 'Петя' },
+  anya: { en: 'Anya', ru: 'Аня' },
+  boris: { en: 'Boris', ru: 'Борис' },
+  mira: { en: 'Mira', ru: 'Мира' },
+};
 
 export const missingCakeCase: CaseDefinition = {
   id: 'missing-cake',
@@ -7,34 +22,36 @@ export const missingCakeCase: CaseDefinition = {
     en: 'The birthday cake vanished before the family celebration. Find out where it went.',
     ru: 'Праздничный торт исчез перед семейным праздником. Узнайте, куда он делся.',
   },
+  initialLocationId: 'kitchen',
+  initiallyOpenedLocationIds: ['kitchen', 'living-room', 'garden', 'corridor'],
   locations: [
     {
       id: 'kitchen',
-      title: { en: 'Kitchen', ru: 'Кухня' },
+      title: locationNames.kitchen,
       description: { en: 'The cake stand is empty, but the room is not quiet.', ru: 'Подставка для торта пуста, но в комнате не тихо.' },
       sceneId: 'kitchen-diorama',
     },
     {
       id: 'living-room',
-      title: { en: 'Living Room', ru: 'Гостиная' },
+      title: locationNames['living-room'],
       description: { en: 'Guests waited here for the celebration to begin.', ru: 'Здесь гости ждали начала праздника.' },
       sceneId: 'living-room-diorama',
     },
     {
       id: 'garden',
-      title: { en: 'Garden', ru: 'Сад' },
+      title: locationNames.garden,
       description: { en: 'Rain has left the path soft and muddy.', ru: 'После дождя дорожка стала мягкой и грязной.' },
       sceneId: 'garden-diorama',
     },
     {
       id: 'corridor',
-      title: { en: 'Corridor', ru: 'Коридор' },
+      title: locationNames.corridor,
       description: { en: 'A narrow route connects the rooms to the back door.', ru: 'Узкий проход соединяет комнаты с задней дверью.' },
       sceneId: 'corridor-diorama',
     },
     {
       id: 'shed',
-      title: { en: 'Shed', ru: 'Сарай' },
+      title: locationNames.shed,
       description: { en: 'A locked-looking shed stands beyond the garden fence.', ru: 'За садовой оградой стоит сарай, похожий на запертый.' },
       sceneId: 'shed-diorama',
       unlockedBy: { kind: 'statement', id: 'petya-admits-shed' },
@@ -112,44 +129,44 @@ export const missingCakeCase: CaseDefinition = {
     { id: 'shed-frosting', kind: 'observation', text: { en: 'The frosting trail ends at the shed.', ru: 'След крема заканчивается у сарая.' } },
     { id: 'cake-in-shed', kind: 'observation', text: { en: 'The cake was moved intact to the shed.', ru: 'Торт целым перенесли в сарай.' } },
     { id: 'pantry-route', kind: 'observation', text: { en: 'The cake box brushed the pantry shelf on its way out.', ru: 'Коробка с тортом задела полку кладовой по пути.' } },
-    { id: 'petya-denies-garden', kind: 'statement', statementId: 'petya-denies-garden', text: { en: 'Petya says he never went into the garden.', ru: 'Петя говорит, что не ходил в сад.' } },
-    { id: 'anya-saw-petya', kind: 'statement', statementId: 'anya-saw-petya', text: { en: 'Anya saw Petya near the kitchen before the alarm.', ru: 'Аня видела Петю возле кухни до тревоги.' } },
-    { id: 'boris-heard-window', kind: 'statement', statementId: 'boris-heard-window', text: { en: 'Boris heard the kitchen window click shut.', ru: 'Борис слышал, как закрылось кухонное окно.' } },
-    { id: 'mira-rain-time', kind: 'statement', statementId: 'mira-rain-time', text: { en: 'Mira says the rain stopped at three thirty.', ru: 'Мира говорит, что дождь закончился в половине четвёртого.' } },
-    { id: 'petya-admits-shed', kind: 'statement', statementId: 'petya-admits-shed', text: { en: 'Petya admits he took the cake to the shed.', ru: 'Петя признаётся, что отнёс торт в сарай.' } },
-    { id: 'petya-admits-window', kind: 'statement', statementId: 'petya-admits-window', text: { en: 'Petya admits entering through the kitchen window.', ru: 'Петя признаётся, что вошёл через кухонное окно.' } },
-    { id: 'petya-surprise', kind: 'statement', statementId: 'petya-surprise', text: { en: 'Petya moved the cake to keep his surprise safe.', ru: 'Петя перенёс торт, чтобы сохранить сюрприз.' } },
-    { id: 'anya-shed-key', kind: 'statement', statementId: 'anya-shed-key', text: { en: 'Anya says Petya had the shed key for decorations.', ru: 'Аня говорит, что у Пети был ключ от сарая для украшений.' } },
-    { id: 'boris-no-cake', kind: 'statement', statementId: 'boris-no-cake', text: { en: 'Boris confirms nobody ate cake in the kitchen.', ru: 'Борис подтверждает, что на кухне никто не ел торт.' } },
-    { id: 'mira-blue-scarf', kind: 'statement', statementId: 'mira-blue-scarf', text: { en: 'Mira noticed Petya’s blue scarf was snagged.', ru: 'Мира заметила, что синий шарф Пети зацепился.' } },
+    { id: 'petya-denies-garden', kind: 'statement', statementId: 'petya-denies-garden' },
+    { id: 'anya-saw-petya', kind: 'statement', statementId: 'anya-saw-petya' },
+    { id: 'boris-heard-window', kind: 'statement', statementId: 'boris-heard-window' },
+    { id: 'mira-rain-time', kind: 'statement', statementId: 'mira-rain-time' },
+    { id: 'petya-admits-shed', kind: 'statement', statementId: 'petya-admits-shed' },
+    { id: 'petya-admits-window', kind: 'statement', statementId: 'petya-admits-window' },
+    { id: 'petya-surprise', kind: 'statement', statementId: 'petya-surprise' },
+    { id: 'anya-shed-key', kind: 'statement', statementId: 'anya-shed-key' },
+    { id: 'boris-no-cake', kind: 'statement', statementId: 'boris-no-cake' },
+    { id: 'mira-blue-scarf', kind: 'statement', statementId: 'mira-blue-scarf' },
   ],
   characters: [
     {
-      id: 'anya', locationId: 'living-room', placement: { x: 0.35, y: 0.48 }, name: { en: 'Anya', ru: 'Аня' }, role: { en: 'the birthday host', ru: 'хозяйка праздника' },
+      id: 'anya', locationId: 'living-room', placement: { x: 0.35, y: 0.48 }, name: characterNames.anya, role: { en: 'the birthday host', ru: 'хозяйка праздника' },
       questions: [
         { id: 'ask-anya-before', text: { en: 'Who was near the kitchen?', ru: 'Кто был возле кухни?' }, responseStatementIds: ['anya-saw-petya'] },
-        { id: 'ask-anya-shed', text: { en: 'Who could open the shed?', ru: 'Кто мог открыть сарай?' }, requires: [{ kind: 'statement', id: 'petya-denies-garden' }], responseStatementIds: ['anya-shed-key'], unlockLocationIds: ['shed'] },
+        { id: 'ask-anya-shed', text: { en: 'Who could open the shed?', ru: 'Кто мог открыть сарай?' }, requires: [{ kind: 'statement', id: 'petya-admits-window' }], responseStatementIds: ['anya-shed-key'] },
       ],
     },
     {
-      id: 'boris', locationId: 'corridor', placement: { x: 0.74, y: 0.52 }, name: { en: 'Boris', ru: 'Борис' }, role: { en: 'the neighbor', ru: 'сосед' },
+      id: 'boris', locationId: 'corridor', placement: { x: 0.74, y: 0.52 }, name: characterNames.boris, role: { en: 'the neighbor', ru: 'сосед' },
       questions: [
         { id: 'ask-boris-window', text: { en: 'What did you hear?', ru: 'Что вы слышали?' }, responseStatementIds: ['boris-heard-window'] },
         { id: 'ask-boris-kitchen', text: { en: 'Was anyone eating cake?', ru: 'Кто-нибудь ел торт?' }, responseStatementIds: ['boris-no-cake'] },
       ],
     },
     {
-      id: 'mira', locationId: 'garden', placement: { x: 0.58, y: 0.45 }, name: { en: 'Mira', ru: 'Мира' }, role: { en: 'the gardener', ru: 'садовница' },
+      id: 'mira', locationId: 'garden', placement: { x: 0.58, y: 0.45 }, name: characterNames.mira, role: { en: 'the gardener', ru: 'садовница' },
       questions: [
         { id: 'ask-mira-rain', text: { en: 'When did the rain stop?', ru: 'Когда закончился дождь?' }, responseStatementIds: ['mira-rain-time'] },
         { id: 'ask-mira-scarf', text: { en: 'Did you notice anything unusual?', ru: 'Вы заметили что-нибудь необычное?' }, requires: [{ kind: 'hotspot', id: 'scarf-thread' }], responseStatementIds: ['mira-blue-scarf'] },
       ],
     },
     {
-      id: 'petya', locationId: 'kitchen', placement: { x: 0.86, y: 0.58 }, name: { en: 'Petya', ru: 'Петя' }, role: { en: 'the younger brother', ru: 'младший брат' },
+      id: 'petya', locationId: 'kitchen', placement: { x: 0.86, y: 0.58 }, name: characterNames.petya, role: { en: 'the younger brother', ru: 'младший брат' },
       questions: [
         { id: 'ask-petya-garden', text: { en: 'Were you in the garden?', ru: 'Ты был в саду?' }, responseStatementIds: ['petya-denies-garden'] },
-        { id: 'ask-petya-cake', text: { en: 'What happened to the cake?', ru: 'Что случилось с тортом?' }, requires: [{ kind: 'deduction', id: 'petya-likely-took-cake' }], responseStatementIds: ['petya-admits-window', 'petya-admits-shed', 'petya-surprise'], unlockLocationIds: ['shed'] },
+        { id: 'ask-petya-cake', text: { en: 'What happened to the cake?', ru: 'Что случилось с тортом?' }, requires: [{ kind: 'deduction', id: 'petya-likely-took-cake' }, { kind: 'statement', id: 'petya-admits-window' }], responseStatementIds: ['petya-admits-shed', 'petya-surprise'], unlockLocationIds: ['shed'] },
       ],
     },
   ],
@@ -166,64 +183,64 @@ export const missingCakeCase: CaseDefinition = {
     { id: 'mira-blue-scarf', speakerId: 'mira', text: { en: 'Mira noticed Petya’s blue scarf was snagged.', ru: 'Мира заметила, что синий шарф Пети зацепился.' } },
   ],
   deductions: [
-    { id: 'fresh-footprints', title: { en: 'The tracks are recent', ru: 'Следы свежие' }, text: { en: 'Rain timing and soft mud place the tracks after the shower.', ru: 'Время дождя и мягкая грязь показывают, что следы оставили после ливня.' }, requiresEvidenceIds: ['footprints-inward', 'recent-rain'] },
-    { id: 'window-route', title: { en: 'The cake left through the window', ru: 'Торт вынесли через окно' }, text: { en: 'The open latch, inward tracks, and untouched back door form one route.', ru: 'Открытый шпингалет, следы и нетронутая задняя дверь указывают на один путь.' }, requiresEvidenceIds: ['window-open', 'footprints-inward', 'door-unused'] },
-    { id: 'petya-likely-took-cake', title: { en: 'Petya handled the cake', ru: 'Петя взял торт' }, text: { en: 'Petya’s thread, Anya’s sighting, and the false denial place him at the window.', ru: 'Нитка Пети, слова Ани и ложное отрицание помещают его у окна.' }, requiresEvidenceIds: ['scarf-thread', 'anya-saw-petya', 'petya-denies-garden'] },
-    { id: 'shed-destination', title: { en: 'The shed is the destination', ru: 'Место назначения — сарай' }, text: { en: 'The frosting trail ends at the shed, where the intact cake is found.', ru: 'След крема заканчивается у сарая, где найден целый торт.' }, requiresEvidenceIds: ['shed-frosting', 'cake-in-shed'] },
+    { id: 'fresh-footprints', prompt: { en: 'When were the tracks made?', ru: 'Когда появились следы?' }, title: { en: 'The tracks are recent', ru: 'Следы свежие' }, text: { en: 'Rain timing and soft mud place the tracks after the shower.', ru: 'Время дождя и мягкая грязь показывают, что следы оставили после ливня.' }, requiresEvidenceIds: ['footprints-inward', 'recent-rain'] },
+    { id: 'window-route', prompt: { en: 'How did the cake leave?', ru: 'Как вынесли торт?' }, title: { en: 'The cake left through the window', ru: 'Торт вынесли через окно' }, text: { en: 'The open latch, inward tracks, and untouched back door form one route.', ru: 'Открытый шпингалет, следы и нетронутая задняя дверь указывают на один путь.' }, requiresEvidenceIds: ['window-open', 'footprints-inward', 'door-unused'] },
+    { id: 'petya-likely-took-cake', prompt: { en: 'Who handled the cake?', ru: 'Кто переносил торт?' }, title: { en: 'Petya handled the cake', ru: 'Петя взял торт' }, text: { en: 'Petya’s thread, Anya’s sighting, and the false denial place him at the window.', ru: 'Нитка Пети, слова Ани и ложное отрицание помещают его у окна.' }, requiresEvidenceIds: ['scarf-thread', 'anya-saw-petya', 'petya-denies-garden'] },
+    { id: 'shed-destination', prompt: { en: 'Where did the cake go?', ru: 'Куда отнесли торт?' }, title: { en: 'The shed is the destination', ru: 'Место назначения — сарай' }, text: { en: 'The frosting trail ends at the shed, where the intact cake is found.', ru: 'След крема заканчивается у сарая, где найден целый торт.' }, requiresEvidenceIds: ['shed-frosting', 'cake-in-shed'] },
   ],
-  contradiction: {
+  contradictions: [{
     id: 'petya-garden-contradiction', title: { en: 'Petya’s story does not fit', ru: 'История Пети не сходится' },
     prompt: { en: 'Show Petya the footprint chain and his scarf thread.', ru: 'Покажите Пете цепочку следов и нитку его шарфа.' },
     evidenceIds: ['footprints-outward', 'scarf-thread'], initialStatementId: 'petya-denies-garden', revealedStatementId: 'petya-admits-window',
-  },
-  solution: {
-    person: {
+  }],
+  theoryFields: [
+    { id: 'person', prompt: { en: 'Who?', ru: 'Кто?' },
       value: 'petya',
       options: [
-        { id: 'petya', label: { en: 'Petya', ru: 'Петя' } },
-        { id: 'anya', label: { en: 'Anya', ru: 'Аня' } },
-        { id: 'boris', label: { en: 'Boris', ru: 'Борис' } },
-        { id: 'mira', label: { en: 'Mira', ru: 'Мира' } },
+        { id: 'petya', label: characterNames.petya },
+        { id: 'anya', label: characterNames.anya },
+        { id: 'boris', label: characterNames.boris },
+        { id: 'mira', label: characterNames.mira },
       ],
-      evidenceIds: ['scarf-thread', 'anya-saw-petya'],
+      evidenceIds: ['scarf-thread', 'anya-saw-petya']
     },
-    origin: {
-      value: 'kitchen',
+    { id: 'origin', prompt: { en: 'Where did he come from?', ru: 'Откуда он пришёл?' },
+      value: 'garden',
       options: [
-        { id: 'kitchen', label: { en: 'Kitchen', ru: 'Кухня' } },
-        { id: 'living-room', label: { en: 'Living Room', ru: 'Гостиная' } },
-        { id: 'garden', label: { en: 'Garden', ru: 'Сад' } },
+        { id: 'kitchen', label: locationNames.kitchen },
+        { id: 'living-room', label: locationNames['living-room'] },
+        { id: 'garden', label: locationNames.garden },
       ],
-      evidenceIds: ['cake-missing'],
+      evidenceIds: ['footprints-inward', 'footprints-outward']
     },
-    entryMethod: {
+    { id: 'entryMethod', prompt: { en: 'How did he enter?', ru: 'Как он вошёл?' },
       value: 'window',
       options: [
         { id: 'window', label: { en: 'Through the kitchen window', ru: 'Через кухонное окно' } },
         { id: 'back-door', label: { en: 'Through the back door', ru: 'Через заднюю дверь' } },
         { id: 'front-door', label: { en: 'Through the front door', ru: 'Через входную дверь' } },
       ],
-      evidenceIds: ['window-open', 'footprints-inward', 'door-unused'],
+      evidenceIds: ['window-open', 'footprints-inward', 'door-unused']
     },
-    event: {
+    { id: 'event', prompt: { en: 'What happened?', ru: 'Что произошло?' },
       value: 'moved-to-shed',
       options: [
         { id: 'moved-to-shed', label: { en: 'Moved it to the shed', ru: 'Перенёс его в сарай' } },
         { id: 'ate-it', label: { en: 'Ate it', ru: 'Съел его' } },
         { id: 'left-it-outside', label: { en: 'Left it outside', ru: 'Оставил его снаружи' } },
       ],
-      evidenceIds: ['shed-frosting', 'cake-in-shed'],
+      evidenceIds: ['shed-frosting', 'cake-in-shed']
     },
-    motive: {
+    { id: 'motive', prompt: { en: 'Why?', ru: 'Зачем?' },
       value: 'surprise',
       options: [
         { id: 'surprise', label: { en: 'Protect a surprise', ru: 'Сохранить сюрприз' } },
         { id: 'hunger', label: { en: 'Get a snack', ru: 'Перекусить' } },
         { id: 'prank', label: { en: 'Play a prank', ru: 'Устроить розыгрыш' } },
       ],
-      evidenceIds: ['petya-surprise', 'anya-shed-key'],
+      evidenceIds: ['petya-surprise', 'anya-shed-key']
     },
-  },
+  ],
   reconstruction: [
     { id: 'reconstruction-1', timestamp: { en: '3:35 PM', ru: '15:35' }, text: { en: 'After the rain, Petya crosses the garden with a secret plan.', ru: 'После дождя Петя пересекает сад с тайным планом.' }, sceneId: 'reconstruction-garden' },
     { id: 'reconstruction-2', timestamp: { en: '3:40 PM', ru: '15:40' }, text: { en: 'He enters the kitchen through the open window.', ru: 'Он входит на кухню через открытое окно.' }, sceneId: 'reconstruction-window' },
@@ -231,4 +248,6 @@ export const missingCakeCase: CaseDefinition = {
     { id: 'reconstruction-4', timestamp: { en: '3:45 PM', ru: '15:45' }, text: { en: 'He follows the pantry route and carries it to the shed.', ru: 'Он идёт через кладовую и несёт его в сарай.' }, sceneId: 'reconstruction-shed' },
     { id: 'reconstruction-5', timestamp: { en: '4:00 PM', ru: '16:00' }, text: { en: 'The cake waits safely for Petya’s surprise reveal.', ru: 'Торт целым ждёт сюрприза Пети.' }, sceneId: 'reconstruction-reveal' },
   ],
+  renderScene: renderMissingCakeScene,
+  renderReconstruction: renderMissingCakeReconstruction,
 };

@@ -2,21 +2,25 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import * as React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { missingCakeCase } from '../case/missingCake'
-import { gameReducer } from '../game/reducer'
-import { acquiredEvidenceIds, canPresentContradiction } from '../game/rules'
-import { freshGameState, type GameState, type Theory } from '../game/state'
+import { missingCakeHotspotBounds } from '../case/missingCakeArtwork'
+import { caseUiText, getText } from '../case/translations'
+import type { GameState, Theory } from '../game/state'
 import type { GameAction } from '../game/reducer'
+import { createGameRuntime } from '../game/runtime'
 import { GameShell } from './GameShell'
-import { SCENE_ASPECT_RATIO, SCENE_VIEWBOX, sceneHotspotBounds } from './SceneArtwork'
-import { loadGame, saveGame } from '../game/storage'
+import { SCENE_ASPECT_RATIO, SCENE_VIEWBOX } from './SceneArtwork'
 import { readFileSync } from 'node:fs'
 
 const globalCss = readFileSync('src/styles/global.css', 'utf8')
+const runtime = createGameRuntime(missingCakeCase)
+const { reducer: gameReducer, freshState: freshGameState, acquiredEvidenceIds, loadGame, saveGame } = runtime
+const petya = missingCakeCase.characters.find(({ id }) => id === 'petya')!
+const canPresentContradiction = (state: GameState) => runtime.availableContradictions(petya, state).length > 0
 
 function renderGame(state: GameState = freshGameState()) {
   function Harness() {
     const [gameState, dispatch] = React.useReducer(gameReducer, state)
-    return <GameShell caseData={missingCakeCase} state={gameState} dispatch={dispatch} />
+    return <GameShell caseData={missingCakeCase} runtime={runtime} state={gameState} dispatch={dispatch} onHome={vi.fn()} />
   }
   return render(<Harness />)
 }
@@ -31,16 +35,19 @@ function renderTheoryHarness(initialState: GameState = freshGameState()) {
       currentState = gameReducer(currentState, action)
       setState(currentState)
     }
-    return <GameShell caseData={missingCakeCase} state={state} dispatch={dispatch} />
+    return <GameShell caseData={missingCakeCase} runtime={runtime} state={state} dispatch={dispatch} onHome={vi.fn()} />
   }
   render(<Harness />)
   return { actions, getState: () => currentState }
 }
 
-const completeTheory: Theory = { person: 'petya', origin: 'kitchen', entryMethod: 'window', event: 'moved-to-shed', motive: 'surprise' }
+const completeTheory: Theory = { person: 'petya', origin: 'garden', entryMethod: 'window', event: 'moved-to-shed', motive: 'surprise' }
 
 describe('GameShell', () => {
-  beforeEach(() => localStorage.clear())
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('reasoning-game:help-seen:v1', '1')
+  })
   afterEach(() => {
     cleanup()
     localStorage.clear()
@@ -49,9 +56,92 @@ describe('GameShell', () => {
     renderGame()
 
     expect(screen.getByRole('heading', { name: 'Kitchen' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Home' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Notebook' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Map' })).toBeTruthy()
     expect(screen.getByText('0 / 13 clues found')).toBeTruthy()
+  })
+
+  it('keeps localized Help copy available and removes the Saved label', () => {
+    renderGame()
+
+    expect(screen.queryByText('Saved')).toBeNull()
+    expect(getText(caseUiText.help, 'en')).toBe('Help')
+    expect(getText(caseUiText.helpTitle, 'en')).toBe('How to investigate')
+    expect(getText(caseUiText.helpStep1, 'en')).toBe('Explore locations and inspect objects.')
+  })
+
+  it('opens Help automatically on first visit and reopens it from the header', async () => {
+    localStorage.clear()
+    renderGame()
+
+    expect(screen.getByRole('dialog', { name: 'How to investigate' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('dialog', { name: 'How to investigate' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Help' }))
+    expect(screen.getByRole('dialog', { name: 'How to investigate' })).toBeTruthy()
+    expect(localStorage.getItem('reasoning-game:help-seen:v1')).toBe('1')
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close' })))
+  })
+
+  it('opens Help and still renders gameplay when localStorage access fails', () => {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage')
+    Object.defineProperty(window, 'localStorage', { configurable: true, get: () => { throw new Error('blocked') } })
+
+    try {
+      renderGame()
+
+      expect(screen.getByRole('dialog', { name: 'How to investigate' })).toBeTruthy()
+      expect(screen.getByRole('heading', { name: 'Kitchen' })).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Help' }))
+      expect(screen.getByRole('dialog', { name: 'How to investigate' })).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+
+      const inspectionToggle = screen.getByRole('button', { name: 'Show inspection hints' })
+      fireEvent.click(inspectionToggle)
+      expect(inspectionToggle.getAttribute('aria-pressed')).toBe('true')
+    } finally {
+      if (originalDescriptor) Object.defineProperty(window, 'localStorage', originalDescriptor)
+    }
+  })
+
+  it('does not open Help automatically when first visit was stored', () => {
+    localStorage.setItem('reasoning-game:help-seen:v1', '1')
+
+    renderGame()
+
+    expect(screen.queryByRole('dialog', { name: 'How to investigate' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Help' }))
+    expect(screen.getByRole('dialog', { name: 'How to investigate' })).toBeTruthy()
+  })
+
+  it('closes Help with Escape and restores focus to its trigger', async () => {
+    localStorage.setItem('reasoning-game:help-seen:v1', '1')
+    renderGame()
+
+    const helpTrigger = screen.getByRole('button', { name: 'Help' })
+    fireEvent.click(helpTrigger)
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    await waitFor(() => expect(document.activeElement).toBe(helpTrigger))
+    expect(screen.queryByRole('dialog', { name: 'How to investigate' })).toBeNull()
+  })
+
+  it('localizes Help dialog and contains focus within it', () => {
+    localStorage.setItem('reasoning-game:help-seen:v1', '1')
+    renderGame()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Help' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change language' }))
+
+    const dialog = screen.getByRole('dialog', { name: 'Как расследовать дело' })
+    expect(dialog).toBeTruthy()
+    expect(screen.getByText('Исследуйте локации и осматривайте предметы.')).toBeTruthy()
+    const buttons = dialog.querySelectorAll('button')
+    buttons[buttons.length - 1].focus()
+    fireEvent.keyDown(buttons[buttons.length - 1], { key: 'Tab' })
+    expect(document.activeElement).toBe(buttons[0])
   })
 
   it('shows evidence progress for every map location', () => {
@@ -74,7 +164,7 @@ describe('GameShell', () => {
   it('discovers meaningful hotspots but keeps decorative hotspots atmospheric', () => {
     const dispatch = vi.fn()
     const state = { ...freshGameState(), locationId: 'garden' }
-    render(<GameShell caseData={missingCakeCase} state={state} dispatch={dispatch} />)
+    render(<GameShell caseData={missingCakeCase} runtime={runtime} state={state} dispatch={dispatch} onHome={vi.fn()} />)
 
     expect(document.getElementById('hotspot-garden-lantern')?.dataset.hotspotId).toBe('garden-lantern')
     fireEvent.click(screen.getByRole('button', { name: /Garden lantern/ }))
@@ -92,7 +182,7 @@ describe('GameShell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Small muddy prints/ }))
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
-    expect(screen.getByRole('status').textContent).toMatch(/select the required clues/i)
+    expect(screen.getByRole('status').textContent).toMatch(/not enough evidence/i)
     expect(screen.getByRole('status').textContent).not.toMatch(/Rain timing/)
 
     fireEvent.click(screen.getByRole('button', { name: /Rain made the footprints/ }))
@@ -105,18 +195,19 @@ describe('GameShell', () => {
     renderGame()
 
     expect(screen.getByText(/select observations and statements/i)).toBeTruthy()
-    expect(screen.getAllByText(/needed clues/i).length).toBeGreaterThan(0)
+    expect(screen.queryByText('Petya handled the cake')).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'Make deduction' })).toHaveLength(1)
   })
 
-  it('places theory before the long notebook content', () => {
+  it('places notebook before the long theory content', () => {
     renderGame()
 
     const theory = screen.getByRole('heading', { name: 'Your theory' })
     const notebook = screen.getByRole('heading', { name: 'Notebook' }).closest('section')!
-    expect(theory.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(notebook.compareDocumentPosition(theory) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('renders desktop investigation panels in Map, Scene, Theory, Notebook order', () => {
+  it('renders desktop investigation panels in Scene, Map, Notebook, Theory order', () => {
     renderGame()
 
     const map = screen.getByRole('heading', { name: 'Map' })
@@ -124,40 +215,117 @@ describe('GameShell', () => {
     const theory = screen.getByRole('heading', { name: 'Your theory' })
     const notebook = screen.getByRole('heading', { name: 'Notebook' })
 
-    expect(map.compareDocumentPosition(scene) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(scene.compareDocumentPosition(theory) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(theory.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(scene.compareDocumentPosition(map) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(map.compareDocumentPosition(notebook) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(notebook.compareDocumentPosition(theory) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
-  it('keeps Notebook outside upper grid and declares mobile panel order', () => {
+  it('keeps only Scene and Map in upper grid', () => {
     renderGame()
 
     const upperGrid = document.querySelector('.game-layout')!
     const notebookLayout = document.querySelector('.notebook-layout')!
+    const theoryLayout = document.querySelector('.theory-layout')!
 
-    expect(upperGrid.children).toHaveLength(3)
-    expect(upperGrid.querySelector('.map-panel')).toBe(upperGrid.children[0])
-    expect(upperGrid.querySelector('.scene-card')).toBe(upperGrid.children[1])
-    expect(upperGrid.querySelector('.theory-panel')).toBe(upperGrid.children[2])
+    expect(upperGrid.children).toHaveLength(2)
+    expect(upperGrid.querySelector('.scene-card')).toBe(upperGrid.children[0])
+    expect(upperGrid.querySelector('.map-panel')).toBe(upperGrid.children[1])
     expect(notebookLayout.parentElement).toBe(document.querySelector('.game-shell'))
     expect(notebookLayout.previousElementSibling).toBe(upperGrid)
+    expect(theoryLayout.previousElementSibling).toBe(notebookLayout)
+  })
+
+  it('orders mobile panels as Scene, Map, Notebook, Theory', () => {
+    renderGame()
+
     expect([
-      upperGrid.children[0].getAttribute('data-mobile-order'),
-      upperGrid.children[1].getAttribute('data-mobile-order'),
-      upperGrid.children[2].getAttribute('data-mobile-order'),
-      notebookLayout.getAttribute('data-mobile-order'),
-    ]).toEqual(['3', '1', '2', '4'])
+      document.querySelector('.scene-card')?.getAttribute('data-mobile-order'),
+      document.querySelector('.map-panel')?.getAttribute('data-mobile-order'),
+      document.querySelector('.notebook-layout')?.getAttribute('data-mobile-order'),
+      document.querySelector('.theory-panel')?.getAttribute('data-mobile-order'),
+    ]).toEqual(['1', '2', '3', '4'])
+  })
+
+  it('orders completed reconstruction after Theory on mobile', () => {
+    renderGame({ ...freshGameState(), theory: completeTheory })
+
+    expect(screen.getByRole('heading', { name: 'Reconstruction' })).toBeTruthy()
+    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.reconstruction-panel\s*\{[^}]*order:\s*5;/)
+  })
+
+  it('renders mobile navigation links to every investigation section', () => {
+    renderGame()
+
+    const navigation = screen.getByRole('navigation', { name: 'Investigation navigation' })
+    expect([...navigation.querySelectorAll('a')].map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+      ['Scene', '#scene-title'],
+      ['Map', '#map-title'],
+      ['Notebook', '#notebook-title'],
+      ['Your theory', '#theory-title'],
+    ])
+    for (const id of ['scene-title', 'map-title', 'notebook-title', 'theory-title']) {
+      expect(document.getElementById(id)).toBeTruthy()
+    }
+    expect(globalCss).toMatch(/\.mobile-section-nav\s*\{[^}]*display:\s*none;/)
+    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.mobile-section-nav\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*0;/)
+    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.game-shell\s*\{[^}]*env\(safe-area-inset-bottom\)/)
+    expect(globalCss).toMatch(/\.mobile-section-nav a:focus-visible\s*\{[^}]*outline:\s*3px solid #694739;/)
+  })
+
+  it('renders Notebook content columns in observations, statements, deductions order', () => {
+    renderGame()
+
+    const notebook = document.querySelector('.notebook-panel')!
+    expect([...notebook.querySelectorAll('.notebook-column')].map((column) => column.className)).toEqual([
+      'notebook-column observations-column',
+      'notebook-column statements-column',
+      'notebook-column deductions-column',
+    ])
+    expect(globalCss).toMatch(/\.notebook-content\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\);/)
+    expect(globalCss).toMatch(/\.notebook-column\s*\{[^}]*min-width:\s*0;/)
+    expect(globalCss).toContain('.notebook-content { grid-template-columns: 1fr; }')
   })
 
   it('declares desktop theory width and mobile field layout contracts', () => {
-    expect(globalCss).toMatch(/\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
-    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*repeat\(2, 1fr\);/)
-    expect(globalCss).toMatch(/@media \(max-width: 480px\)[^{]*\{[^]*?\.game-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
+    expect(globalCss).toMatch(/\.theory-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
+    expect(globalCss).toMatch(/@media \(max-width: 900px\)[^{]*\{[^]*?\.theory-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*repeat\(2, 1fr\);/)
+    expect(globalCss).toMatch(/@media \(max-width: 480px\)[^{]*\{[^]*?\.theory-layout \.theory-fields\s*\{[^}]*grid-template-columns:\s*1fr;/)
+  })
+
+  it('keeps hotspot labels readable over scene artwork', () => {
+    expect(globalCss).toMatch(/\.hotspot-button\s*\{(?=[^}]*font-size:\s*\.9rem;)(?=[^}]*padding:\s*\.45rem \.6rem;)(?=[^}]*color:\s*#30271f;)(?=[^}]*background:\s*#fffaf3;)[^}]*\}/)
+    expect(globalCss).toMatch(/@media \(max-width: 600px\)[^{]*\{[^]*?\.hotspot-button\s*\{[^}]*font-size:\s*\.65rem;/)
+  })
+
+  it('keeps modal widths stable on desktop and fluid on narrow screens', () => {
+    expect(globalCss).toMatch(/\.dialogue-panel, \.evidence-dialog\s*\{[^}]*width:\s*34rem;[^}]*min-width:\s*34rem;/)
+    expect(globalCss).toMatch(/\.confirm-dialog\s*\{[^}]*width:\s*28rem;[^}]*min-width:\s*28rem;/)
+    expect(globalCss).toMatch(/\.help-dialog\s*\{[^}]*position:\s*relative;/)
+    expect(globalCss).toContain('@media (max-width: 600px)')
+    expect(globalCss).toContain('.dialogue-panel, .evidence-dialog, .confirm-dialog { width: 100%; min-width: 0; max-width: 100%; }')
+  })
+
+  it('scrolls to Map and Notebook when desktop navigation is clicked', () => {
+    renderGame()
+
+    const map = document.querySelector('.map-panel')!
+    const notebook = document.querySelector('.notebook-layout')!
+    const mapScroll = vi.fn()
+    const notebookScroll = vi.fn()
+    Object.defineProperty(map, 'scrollIntoView', { value: mapScroll })
+    Object.defineProperty(notebook, 'scrollIntoView', { value: notebookScroll })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Map' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Notebook' }))
+
+    expect(mapScroll).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+    expect(notebookScroll).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+    expect(globalCss).toMatch(/\.map-panel\s*\{[^}]*position:\s*sticky;[^}]*top:\s*1rem;/)
   })
 
   it('keeps every case hotspot inside its visible scene prop bounds', () => {
     for (const hotspot of missingCakeCase.hotspots) {
-      const bounds = sceneHotspotBounds[hotspot.id]
+      const bounds = missingCakeHotspotBounds[hotspot.id]
       expect(bounds, hotspot.id).toBeTruthy()
       expect(hotspot.placement.x).toBeGreaterThanOrEqual(bounds.x[0])
       expect(hotspot.placement.x).toBeLessThanOrEqual(bounds.x[1])
@@ -180,7 +348,7 @@ describe('GameShell', () => {
     expect(Number.parseFloat(character.style.top)).toBeCloseTo(58)
   })
 
-  it('does not report success when repeating a completed deduction', () => {
+  it('does not report success after a completed deduction clears selection', () => {
     const state = { ...freshGameState(), discoveredHotspotIds: ['muddy-footprints', 'wet-umbrella'] }
     renderGame(state)
 
@@ -189,7 +357,7 @@ describe('GameShell', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
     expect(screen.getByRole('status').textContent).toMatch(/deduction added/i)
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
-    expect(screen.getByRole('status').textContent).toMatch(/already made/i)
+    expect(screen.getByRole('status').textContent).toMatch(/not enough evidence/i)
     expect(screen.getByRole('status').textContent).not.toMatch(/^Deduction added\.$/)
   })
 
@@ -289,13 +457,17 @@ describe('GameShell', () => {
     expect(document.activeElement).toBe(dialogueButtons[0])
   })
 
-  it('renders Russian labels after language switch', () => {
+  it('renders one Russian question-list label after language switch', async () => {
     renderGame()
 
     fireEvent.click(screen.getByRole('button', { name: 'Change language' }))
     expect(screen.getByRole('heading', { name: 'Кухня' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Блокнот' })).toBeTruthy()
     expect(document.documentElement.lang).toBe('ru')
+
+    fireEvent.click(screen.getByRole('button', { name: /Петя/ }))
+    await waitFor(() => expect(screen.getAllByText('Спросить')).toHaveLength(1))
+    expect(screen.getByRole('heading', { name: 'Спросить', level: 3 })).toBeTruthy()
   })
 
   it('integrates theory scoring, retry, evidence preservation, and reconstruction actions', () => {
@@ -306,14 +478,14 @@ describe('GameShell', () => {
     expect(screen.getByRole('status').textContent).toMatch(/wrong/i)
     expect(screen.queryByRole('heading', { name: 'Reconstruction' })).toBeNull()
 
-    fireEvent.change(screen.getByLabelText('Who'), { target: { value: completeTheory.person } })
+    fireEvent.change(screen.getByLabelText('Who?'), { target: { value: completeTheory.person } })
     expect(screen.queryByRole('status')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Submit theory' }))
     expect(screen.getByRole('status').textContent).toMatch(/part of your theory/i)
     expect(screen.queryByRole('heading', { name: 'Reconstruction' })).toBeNull()
 
     for (const [field, value] of Object.entries(completeTheory)) {
-      const label = { person: 'Who', origin: 'Where did it start?', entryMethod: 'How did they enter?', event: 'What happened?', motive: 'Why?' }[field as keyof Theory]
+      const label = missingCakeCase.theoryFields.find(({ id }) => id === field)!.prompt.en
       fireEvent.change(screen.getByLabelText(label), { target: { value } })
     }
     fireEvent.click(screen.getByRole('button', { name: 'Submit theory' }))
@@ -351,7 +523,7 @@ describe('GameShell', () => {
 
     cleanup()
     renderGame(loadedState)
-    expect((screen.getByLabelText('Who') as HTMLSelectElement).value).toBe('petya')
+    expect((screen.getByLabelText('Who?') as HTMLSelectElement).value).toBe('petya')
     expect(screen.getByText(missingCakeCase.reconstruction[persistedStep].text.en)).toBeTruthy()
   })
 })

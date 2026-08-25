@@ -1,12 +1,6 @@
-import type { Language } from '../case/types';
+import type { CaseDefinition, Language } from '../case/types';
 
-export interface Theory {
-  person: string;
-  origin: string;
-  entryMethod: string;
-  event: string;
-  motive: string;
-}
+export type Theory = Record<string, string>;
 
 export interface GameState {
   locationId: string;
@@ -16,33 +10,24 @@ export interface GameState {
   receivedStatementIds: string[];
   deductionIds: string[];
   selectedEvidenceIds: string[];
+  resolvedContradictionIds: string[];
   theory: Theory;
   language: Language;
   reconstructionStep: number;
 }
 
-export const initialGameState: GameState = {
-  locationId: 'kitchen',
-  openedLocationIds: ['kitchen', 'living-room', 'garden', 'corridor'],
-  discoveredHotspotIds: [],
-  askedQuestionIds: [],
-  receivedStatementIds: [],
-  deductionIds: [],
-  selectedEvidenceIds: [],
-  theory: { person: '', origin: '', entryMethod: '', event: '', motive: '' },
-  language: 'en',
-  reconstructionStep: 0,
-};
-
-export function freshGameState(): GameState {
+export function freshGameState(caseData: CaseDefinition): GameState {
   return {
-    ...initialGameState,
-    openedLocationIds: [...initialGameState.openedLocationIds],
-    discoveredHotspotIds: [...initialGameState.discoveredHotspotIds],
-    askedQuestionIds: [...initialGameState.askedQuestionIds],
-    receivedStatementIds: [...initialGameState.receivedStatementIds],
-    deductionIds: [...initialGameState.deductionIds],
-    selectedEvidenceIds: [...initialGameState.selectedEvidenceIds],
-    theory: { ...initialGameState.theory },
+    locationId: caseData.initialLocationId,
+    openedLocationIds: [...caseData.initiallyOpenedLocationIds],
+    discoveredHotspotIds: [],
+    askedQuestionIds: [],
+    receivedStatementIds: [],
+    deductionIds: [],
+    selectedEvidenceIds: [],
+    resolvedContradictionIds: [],
+    theory: Object.fromEntries(caseData.theoryFields.map(({ id }) => [id, ''])),
+    language: 'en',
+    reconstructionStep: 0,
   };
 }

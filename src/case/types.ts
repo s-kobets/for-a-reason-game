@@ -64,12 +64,13 @@ export interface Character {
 export interface Evidence {
   id: string;
   kind: EvidenceKind;
-  text: LocalizedText;
+  text?: LocalizedText;
   statementId?: string;
 }
 
 export interface Deduction {
   id: string;
+  prompt: LocalizedText;
   title: LocalizedText;
   text: LocalizedText;
   requiresEvidenceIds: string[];
@@ -89,18 +90,12 @@ export interface TheoryOption {
   label: LocalizedText;
 }
 
-export interface SolutionField {
+export interface TheoryField {
+  id: string;
+  prompt: LocalizedText;
   value: string;
   options: TheoryOption[];
   evidenceIds: string[];
-}
-
-export interface CaseSolution {
-  person: SolutionField;
-  origin: SolutionField;
-  entryMethod: SolutionField;
-  event: SolutionField;
-  motive: SolutionField;
 }
 
 export interface ReconstructionStep {
@@ -114,13 +109,18 @@ export interface CaseDefinition {
   id: string;
   title: LocalizedText;
   introduction: LocalizedText;
+  initialLocationId: string;
+  initiallyOpenedLocationIds: string[];
   locations: Location[];
   hotspots: Hotspot[];
   evidence: Evidence[];
   characters: Character[];
   statements: Statement[];
   deductions: Deduction[];
-  contradiction: Contradiction;
-  solution: CaseSolution;
+  contradictions: Contradiction[];
+  theoryFields: TheoryField[];
   reconstruction: ReconstructionStep[];
+  renderScene(sceneId: string): ReactNode;
+  renderReconstruction(sceneId: string): ReactNode;
 }
+import type { ReactNode } from 'react';

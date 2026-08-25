@@ -1,5 +1,7 @@
 import type { Language, LocalizedText } from '../case/types'
+import { renderMissingCakeScene } from '../case/missingCakeArtwork'
 import { getText } from '../case/translations'
+import { SCENE_VIEWBOX } from './SceneArtwork'
 
 export type Theme = 'light' | 'dark'
 
@@ -23,14 +25,18 @@ const text = {
   caseNumber: { en: 'Case 01', ru: 'Дело 01' },
   missingCake: { en: 'The Missing Cake', ru: 'Исчезнувший торт' },
   playCake: { en: 'Play The Missing Cake', ru: 'Играть в «Исчезнувший торт»' },
+  resumeCake: { en: 'Resume The Missing Cake', ru: 'Продолжить «Исчезнувший торт»' },
+  inProgress: { en: 'In progress', ru: 'В процессе' },
   greenhouse: { en: 'The Midnight Greenhouse', ru: 'Полуночная оранжерея' },
+  greenhouseDescription: { en: 'A locked glasshouse blooms after dark.', ru: 'Запертая оранжерея расцветает после полуночи.' },
   violin: { en: 'The Vanishing Violin', ru: 'Исчезнувшая скрипка' },
+  violinDescription: { en: 'A concert ends with one instrument missing.', ru: 'После концерта исчезает одна скрипка.' },
   comingSoon: { en: 'Coming soon', ru: 'Скоро' },
   explore: { en: 'Explore every scene', ru: 'Исследуйте каждую сцену' },
   connect: { en: 'Connect clues', ru: 'Сопоставляйте улики' },
   explain: { en: 'Tell the full story', ru: 'Расскажите всю историю' },
   footer: { en: 'Small mysteries. No timers. No dead ends.', ru: 'Небольшие тайны. Без таймеров. Без тупиков.' },
-  language: { en: 'Change language', ru: 'Сменить язык' },
+  language: { en: 'Switch to Russian', ru: 'Переключить на английский' },
   light: { en: 'Turn on light theme', ru: 'Включить светлую тему' },
   dark: { en: 'Turn on dark theme', ru: 'Включить тёмную тему' },
 } satisfies Record<string, LocalizedText>
@@ -63,9 +69,9 @@ export function LandingPage({ language, theme, hasSavedGame, onChangeLanguage, o
     <section id="cases" className="landing-cases" aria-labelledby="cases-title">
       <div className="landing-section-heading"><h2 id="cases-title">{t(text.choose)}</h2><span>{t(text.ready)}</span></div>
       <div className="case-grid">
-        <button className="case-card case-card-live" type="button" onClick={onPlay} aria-label={t(text.playCake)}><span>{t(text.caseNumber)}</span><strong>{t(text.missingCake)}</strong></button>
-        <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.greenhouse)}</strong></article>
-        <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.violin)}</strong></article>
+        <button className="case-card case-card-live" type="button" onClick={onPlay} aria-label={t(hasSavedGame ? text.resumeCake : text.playCake)}><span className="case-card-preview" aria-hidden="true"><svg viewBox={SCENE_VIEWBOX} focusable="false" aria-hidden="true"><rect width="1000" height="620" fill="#f4d7a1" />{renderMissingCakeScene('kitchen-diorama')}</svg></span><span>{t(text.caseNumber)}</span><strong>{t(text.missingCake)}</strong>{hasSavedGame && <small>{t(text.inProgress)}</small>}</button>
+        <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.greenhouse)}</strong><p>{t(text.greenhouseDescription)}</p></article>
+        <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.violin)}</strong><p>{t(text.violinDescription)}</p></article>
       </div>
     </section>
     <section className="landing-steps" aria-label={t(text.explain)}>

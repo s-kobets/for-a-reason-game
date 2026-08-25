@@ -4,9 +4,21 @@ export function getText(text: LocalizedText, language: Language): string {
   return text[language];
 }
 
+export function formatClueCount(found: number, total: number, language: Language): string {
+  return `${found} / ${total} ${language === 'ru' ? 'улик' : total === 1 ? 'clue' : 'clues'}`;
+}
+
+export function formatRequiredClues(count: number, language: Language): string {
+  if (language === 'ru') return `Соедините ${count} ${count === 1 ? 'улику' : 'улики'}`;
+  return `Connect ${count} ${count === 1 ? 'clue' : 'clues'}`;
+}
+
 export const caseUiText = {
   caseFile: { en: 'Case file', ru: 'Дело' },
   reasoningGame: { en: 'A reasoning game', ru: 'Детективная игра' },
+  home: { en: 'Home', ru: 'Главная' },
+  scene: { en: 'Scene', ru: 'Сцена' },
+  investigationNavigation: { en: 'Investigation navigation', ru: 'Навигация расследования' },
   map: { en: 'Map', ru: 'Карта' },
   notebook: { en: 'Notebook', ru: 'Блокнот' },
   close: { en: 'Close', ru: 'Закрыть' },
@@ -18,7 +30,7 @@ export const caseUiText = {
   talkTo: { en: 'Talk to', ru: 'Поговорить с' },
   contradictionReady: { en: 'The evidence is ready to challenge this story.', ru: 'Улик достаточно, чтобы оспорить эту историю.' },
   discovered: { en: 'Discovered', ru: 'Найдено' },
-  cluesFound: { en: 'clues found', ru: 'улик найдено' },
+  cluesFound: { en: 'found', ru: 'найдено' },
   clues: { en: 'clues', ru: 'улик' },
   neededClues: { en: 'needed clues', ru: 'нужно улик' },
   selectRequiredClues: { en: 'Select the required clues', ru: 'Выберите нужные улики' },
@@ -58,8 +70,14 @@ export const caseUiText = {
   next: { en: 'Next', ru: 'Далее' },
   replay: { en: 'Replay', ru: 'Повторить' },
   caseUnderstood: { en: 'Case understood', ru: 'Дело раскрыто' },
-  saved: { en: 'Saved', ru: 'Сохранено' },
-  saveInMemory: { en: 'Saved in memory only', ru: 'Сохранено только в памяти' },
+  help: { en: 'Help', ru: 'Помощь' },
+  helpTitle: { en: 'How to investigate', ru: 'Как расследовать дело' },
+  helpStep1: { en: 'Explore locations and inspect objects.', ru: 'Исследуйте локации и осматривайте предметы.' },
+  helpStep2: { en: 'Collect observations and statements in the notebook.', ru: 'Собирайте наблюдения и показания в блокноте.' },
+  helpStep3: { en: 'Ask characters questions.', ru: 'Задавайте персонажам вопросы.' },
+  helpStep4: { en: 'Connect evidence and make deductions.', ru: 'Сопоставляйте улики и делайте выводы.' },
+  helpStep5: { en: 'Build a theory about what happened.', ru: 'Составьте версию произошедшего.' },
+  helpStep6: { en: 'Reconstruct the events.', ru: 'Восстановите ход событий.' },
   reset: { en: 'Reset case', ru: 'Начать заново' },
   resetTitle: { en: 'Reset case?', ru: 'Начать расследование заново?' },
   resetPrompt: { en: 'All investigation progress will be lost.', ru: 'Весь прогресс расследования будет потерян.' },

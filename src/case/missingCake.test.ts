@@ -3,8 +3,6 @@ import { missingCakeCase } from './missingCake';
 import { getText } from './translations';
 import type { LocalizedText } from './types';
 
-const solutionKeys = ['person', 'origin', 'entryMethod', 'event', 'motive'] as const;
-
 function expectLocalized(text: LocalizedText) {
   expect(text.en.trim()).not.toBe('');
   expect(text.ru.trim()).not.toBe('');
@@ -44,7 +42,7 @@ describe('missingCakeCase', () => {
       expectLocalized(hotspot.description);
       if (hotspot.falseLead) expectLocalized(hotspot.falseLead);
     }
-    for (const evidence of missingCakeCase.evidence) expectLocalized(evidence.text);
+    for (const evidence of missingCakeCase.evidence) if (evidence.text) expectLocalized(evidence.text);
     for (const character of missingCakeCase.characters) {
       expectLocalized(character.name);
       expectLocalized(character.role);
@@ -52,13 +50,18 @@ describe('missingCakeCase', () => {
     }
     for (const statement of missingCakeCase.statements) expectLocalized(statement.text);
     for (const deduction of missingCakeCase.deductions) {
+      expect(deduction.prompt.en).toBeTruthy();
+      expect(deduction.prompt.ru).toBeTruthy();
       expectLocalized(deduction.title);
       expectLocalized(deduction.text);
     }
-    expectLocalized(missingCakeCase.contradiction.title);
-    expectLocalized(missingCakeCase.contradiction.prompt);
-    for (const key of solutionKeys) {
-      for (const option of missingCakeCase.solution[key].options) expectLocalized(option.label);
+    for (const contradiction of missingCakeCase.contradictions) {
+      expectLocalized(contradiction.title);
+      expectLocalized(contradiction.prompt);
+    }
+    for (const field of missingCakeCase.theoryFields) {
+      expectLocalized(field.prompt);
+      for (const option of field.options) expectLocalized(option.label);
     }
     for (const step of missingCakeCase.reconstruction) {
       expectLocalized(step.timestamp);
@@ -104,10 +107,11 @@ describe('missingCakeCase', () => {
       }
     }
     for (const deduction of missingCakeCase.deductions) expectReferences(deduction.requiresEvidenceIds, evidenceIds);
-    expectReferences(missingCakeCase.contradiction.evidenceIds, evidenceIds);
-    expectReferences([missingCakeCase.contradiction.initialStatementId, missingCakeCase.contradiction.revealedStatementId], statementIds);
-    for (const key of solutionKeys) {
-      const field = missingCakeCase.solution[key];
+    for (const contradiction of missingCakeCase.contradictions) {
+      expectReferences(contradiction.evidenceIds, evidenceIds);
+      expectReferences([contradiction.initialStatementId, contradiction.revealedStatementId], statementIds);
+    }
+    for (const field of missingCakeCase.theoryFields) {
       expect(field.evidenceIds.length).toBeGreaterThan(0);
       expectReferences(field.evidenceIds, evidenceIds);
       expect(field.options.map(({ id }) => id)).toContain(field.value);
@@ -135,7 +139,7 @@ describe('missingCakeCase', () => {
   it('covers unlocks, contradiction, deductions, reconstruction, decorative hotspot, and false lead provenance', () => {
     expect(missingCakeCase.locations.find(({ id }) => id === 'shed')?.unlockedBy).toEqual({ kind: 'statement', id: 'petya-admits-shed' });
     expect(missingCakeCase.characters.flatMap(({ questions }) => questions).some(({ unlockLocationIds }) => unlockLocationIds?.includes('shed'))).toBe(true);
-    expect(missingCakeCase.contradiction.evidenceIds).toHaveLength(2);
+    expect(missingCakeCase.contradictions[0].evidenceIds).toHaveLength(2);
     expect(missingCakeCase.deductions.every(({ requiresEvidenceIds }) => requiresEvidenceIds.length > 0)).toBe(true);
     expect(missingCakeCase.reconstruction.map(({ id }) => id)).toEqual([
       'reconstruction-1', 'reconstruction-2', 'reconstruction-3', 'reconstruction-4', 'reconstruction-5',
@@ -146,5 +150,19 @@ describe('missingCakeCase', () => {
     const falseLead = missingCakeCase.hotspots.find(({ falseLead }) => falseLead);
     expect(falseLead?.falseLeadEvidenceIds?.length).toBeGreaterThan(0);
     expect(falseLead?.falseLead).toBeTruthy();
+  });
+
+  it('requires the contradiction before confession and uses Garden as the origin', () => {
+    const confession = missingCakeCase.characters.flatMap(({ questions }) => questions).find(({ id }) => id === 'ask-petya-cake')!;
+    expect(confession.requires).toContainEqual({ kind: 'statement', id: 'petya-admits-window' });
+    expect(missingCakeCase.characters.flatMap(({ questions }) => questions).find(({ id }) => id === 'ask-anya-shed')?.unlockLocationIds).toBeUndefined();
+    expect(missingCakeCase.theoryFields.find(({ id }) => id === 'origin')?.value).toBe('garden');
+  });
+
+  it('reuses translated entity labels in theory options', () => {
+    const people = missingCakeCase.theoryFields.find(({ id }) => id === 'person')!;
+    for (const option of people.options) expect(option.label).toBe(missingCakeCase.characters.find(({ id }) => id === option.id)!.name);
+    const origins = missingCakeCase.theoryFields.find(({ id }) => id === 'origin')!;
+    for (const option of origins.options) expect(option.label).toBe(missingCakeCase.locations.find(({ id }) => id === option.id)!.title);
   });
 });
