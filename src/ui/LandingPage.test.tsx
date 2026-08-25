@@ -24,6 +24,7 @@ describe('LandingPage', () => {
 
     expect(screen.getByRole('heading', { name: 'Что-то случилось. Сможете понять почему?' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Продолжить расследование' })).toBeTruthy()
+    expect(screen.getByText('Дело 01')).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Сменить язык' }))
     fireEvent.click(screen.getByRole('button', { name: 'Включить светлую тему' }))
     expect(onChangeLanguage).toHaveBeenCalledOnce()

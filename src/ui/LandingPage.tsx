@@ -20,6 +20,7 @@ const text = {
   resume: { en: 'Resume your case', ru: 'Продолжить расследование' },
   choose: { en: 'Choose a case', ru: 'Выберите дело' },
   ready: { en: '1 case ready', ru: '1 дело доступно' },
+  caseNumber: { en: 'Case 01', ru: 'Дело 01' },
   missingCake: { en: 'The Missing Cake', ru: 'Исчезнувший торт' },
   playCake: { en: 'Play The Missing Cake', ru: 'Играть в «Исчезнувший торт»' },
   greenhouse: { en: 'The Midnight Greenhouse', ru: 'Полуночная оранжерея' },
@@ -62,7 +63,7 @@ export function LandingPage({ language, theme, hasSavedGame, onChangeLanguage, o
     <section id="cases" className="landing-cases" aria-labelledby="cases-title">
       <div className="landing-section-heading"><h2 id="cases-title">{t(text.choose)}</h2><span>{t(text.ready)}</span></div>
       <div className="case-grid">
-        <button className="case-card case-card-live" type="button" onClick={onPlay} aria-label={t(text.playCake)}><span>Case 01</span><strong>{t(text.missingCake)}</strong></button>
+        <button className="case-card case-card-live" type="button" onClick={onPlay} aria-label={t(text.playCake)}><span>{t(text.caseNumber)}</span><strong>{t(text.missingCake)}</strong></button>
         <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.greenhouse)}</strong></article>
         <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.violin)}</strong></article>
       </div>
