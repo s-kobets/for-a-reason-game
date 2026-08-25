@@ -194,3 +194,34 @@ h1 {
  @media (max-width: 600px) { .game-header { align-items: flex-start; gap: 1rem; flex-direction: column; } .header-actions { width: 100%; } .header-actions button { flex: 1; } .scene-heading { display: block; } .scene-status { display: block; margin-top: .7rem; } .hotspot-button { font-size: .65rem; } .character-card { padding: .3rem .45rem; font-size: .8rem; } }
 @media (max-width: 900px) { .game-layout .theory-fields { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 480px) { .game-layout .theory-fields { grid-template-columns: 1fr; } }
+[data-theme='dark'] { color-scheme: dark; }
+[data-theme='light'] { color-scheme: light; }
+.landing-page { min-height: 100vh; color: #20342d; background: #f7f0d9; font-family: ui-rounded, 'Arial Rounded MT Bold', system-ui, sans-serif; }
+[data-theme='dark'] .landing-page { color: #f8efd6; background: #162822; }
+.landing-header { display: flex; align-items: center; justify-content: space-between; max-width: 76rem; margin: auto; padding: 1.25rem clamp(1rem, 4vw, 3rem); }
+.landing-brand { color: inherit; font-size: 1.2rem; font-weight: 800; text-decoration: none; }
+.landing-header nav { display: flex; align-items: center; gap: .6rem; }
+.landing-header nav a, .landing-header nav button { border: 1px solid currentColor; border-radius: 999px; padding: .5rem .75rem; color: inherit; background: transparent; text-decoration: none; cursor: pointer; }
+.landing-hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; max-width: 76rem; min-height: 38rem; margin: auto; padding: 4rem clamp(1rem, 4vw, 3rem) 6rem; }
+.landing-hero h1 { max-width: 12ch; font-size: clamp(3rem, 7vw, 6.5rem); font-weight: 800; line-height: .92; }
+.landing-hero-copy > p:not(.eyebrow) { max-width: 34rem; font: 1.1rem/1.65 system-ui, sans-serif; opacity: .75; }
+.landing-primary { border: 0; border-radius: 999px; margin-top: 1rem; padding: .9rem 1.25rem; color: #fff9e9; background: #df6945; box-shadow: 0 5px 0 #a84e33; cursor: pointer; font-weight: 800; }
+.landing-preview { position: relative; display: grid; place-items: center; aspect-ratio: 1.15; overflow: hidden; border-radius: 50% 50% 1.5rem 1.5rem; background: #91b99b; box-shadow: inset 0 -4rem rgba(40,78,59,.15), 0 2rem 5rem rgba(34,70,53,.16); }
+[data-theme='dark'] .landing-preview { background: #395d4f; }
+.preview-window { position: absolute; top: 12%; width: 38%; height: 34%; border: .75rem solid #f6ddb1; border-radius: 50% 50% .5rem .5rem; background: #cae8dd; }
+.preview-cake { z-index: 1; margin-top: 24%; font-size: clamp(5rem, 10vw, 8rem); filter: drop-shadow(0 .8rem 0 rgba(49,74,61,.16)); }
+.preview-clue { position: absolute; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 50%; color: #5b3b24; background: #f8d77d; font-weight: 900; animation: clue-float 3s ease-in-out infinite; }
+.preview-clue-one { left: 14%; bottom: 18%; }.preview-clue-two { top: 16%; right: 13%; animation-delay: -1.5s; }
+.landing-cases { padding: 5rem max(clamp(1rem, 4vw, 3rem), calc((100vw - 76rem) / 2 + 3rem)); background: rgba(255,255,255,.3); }
+[data-theme='dark'] .landing-cases { background: rgba(0,0,0,.13); }
+.landing-section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }.landing-section-heading h2 { font-size: clamp(2rem, 4vw, 3.5rem); }
+.case-grid { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 1rem; }
+.case-card { display: flex; min-height: 15rem; flex-direction: column; justify-content: flex-end; border: 0; border-radius: 1.25rem; padding: 1.5rem; color: inherit; background: rgba(255,255,255,.6); text-align: left; }
+[data-theme='dark'] .case-card { background: #203c33; }.case-card span { font: .75rem system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; }.case-card strong { margin-top: .5rem; font-size: 1.4rem; }
+.case-card-live { color: #fff8df; background: #d76542; cursor: pointer; }.case-card-live:hover { transform: translateY(-3px); }
+[data-theme='dark'] .case-card-live { background: #b95337; }.case-card[aria-disabled='true'] { opacity: .72; }
+.landing-steps { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 76rem; margin: auto; padding: 5rem clamp(1rem, 4vw, 3rem); text-align: center; }.landing-steps div { display: grid; gap: .5rem; }.landing-steps b { color: #df6945; font: 2rem Georgia, serif; }
+.landing-footer { max-width: 76rem; margin: auto; padding: 1.5rem clamp(1rem, 4vw, 3rem); opacity: .65; }
+@keyframes clue-float { 50% { transform: translateY(-.6rem) rotate(4deg); } }
+@media (prefers-reduced-motion: reduce) { .preview-clue { animation: none; }.case-card-live:hover { transform: none; } }
+@media (max-width: 700px) { .landing-header nav > a { display: none; }.landing-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 3rem; }.landing-preview { grid-row: 2; }.case-grid, .landing-steps { grid-template-columns: 1fr; }.case-card { min-height: 11rem; } }
