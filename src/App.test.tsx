@@ -2,9 +2,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { missingCakeCase } from './case/missingCake'
+import { midnightGreenhouseCase } from './case/midnightGreenhouse'
 import { createGameRuntime } from './game/runtime'
 
-const runtime = createGameRuntime(missingCakeCase)
+const cakeRuntime = createGameRuntime(missingCakeCase)
+const greenhouseRuntime = createGameRuntime(midnightGreenhouseCase)
 
 describe('App landing flow', () => {
   beforeEach(() => {
@@ -21,17 +23,36 @@ describe('App landing flow', () => {
 
   it('opens the game and returns home with resume available', async () => {
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: 'Start investigating' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play The Missing Cake' }))
     expect(screen.getByRole('heading', { name: 'Kitchen' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Home' }))
-    expect(screen.getByRole('button', { name: 'Resume your case' })).toBeTruthy()
-    await waitFor(() => expect(runtime.hasSavedGame()).toBe(true))
+    expect(screen.getByRole('button', { name: 'Resume The Missing Cake' })).toBeTruthy()
+    await waitFor(() => expect(cakeRuntime.hasSavedGame()).toBe(true))
   })
 
   it('loads saved language and labels the case as resumable', () => {
-    runtime.saveGame({ ...runtime.freshState(), language: 'ru', discoveredHotspotIds: ['cake-stand'] })
+    cakeRuntime.saveGame({ ...cakeRuntime.freshState(), language: 'ru', discoveredHotspotIds: ['cake-stand'] })
     render(<App />)
-    expect(screen.getByRole('button', { name: 'Продолжить расследование' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Продолжить «Исчезнувший торт»' })).toBeTruthy()
+  })
+
+  it('opens and resumes each case through its own runtime', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Play The Midnight Greenhouse' }))
+    expect(screen.getByRole('heading', { name: 'The Midnight Greenhouse' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Glasshouse' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+
+    await waitFor(() => expect(greenhouseRuntime.hasSavedGame()).toBe(true))
+    expect(screen.getByRole('button', { name: 'Resume The Midnight Greenhouse' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Play The Missing Cake' })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play The Missing Cake' }))
+    expect(screen.getByRole('heading', { name: 'Kitchen' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+    await waitFor(() => expect(cakeRuntime.hasSavedGame()).toBe(true))
+    expect(screen.getByRole('button', { name: 'Resume The Midnight Greenhouse' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Resume The Missing Cake' })).toBeTruthy()
   })
 
   it('uses system theme without saving it, then remembers a manual override', () => {
@@ -52,7 +73,7 @@ describe('App landing flow', () => {
     Object.defineProperty(window, 'localStorage', { configurable: true, get: () => { throw new Error('blocked') } })
     try {
       render(<App />)
-      expect(screen.getByRole('button', { name: 'Start investigating' })).toBeTruthy()
+      expect(screen.getByRole('link', { name: 'Start investigating' })).toBeTruthy()
     } finally {
       if (original) Object.defineProperty(window, 'localStorage', original)
     }
@@ -62,9 +83,9 @@ describe('App landing flow', () => {
     render(<App />)
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start investigating' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play The Missing Cake' }))
     fireEvent.click(screen.getByRole('button', { name: 'Home' }))
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Start investigating' })).toBeTruthy())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Play The Missing Cake' })).toBeTruthy())
   })
 })
