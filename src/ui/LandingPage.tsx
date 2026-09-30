@@ -31,11 +31,7 @@ const text = {
   intro: { en: 'Explore cozy scenes, question everyone, connect the clues, and rebuild the whole story.', ru: 'Исследуйте уютные сцены, задавайте вопросы, сопоставляйте улики и восстановите всю историю.' },
   start: { en: 'Start investigating', ru: 'Начать расследование' },
   choose: { en: 'Choose a case', ru: 'Выберите дело' },
-  ready: { en: '2 cases ready', ru: '2 дела доступны' },
   inProgress: { en: 'In progress', ru: 'В процессе' },
-  violin: { en: 'The Vanishing Violin', ru: 'Исчезнувшая скрипка' },
-  violinDescription: { en: 'A concert ends with one instrument missing.', ru: 'После концерта исчезает одна скрипка.' },
-  comingSoon: { en: 'Coming soon', ru: 'Скоро' },
   explore: { en: 'Explore every scene', ru: 'Исследуйте каждую сцену' },
   connect: { en: 'Connect clues', ru: 'Сопоставляйте улики' },
   explain: { en: 'Tell the full story', ru: 'Расскажите всю историю' },
@@ -44,6 +40,8 @@ const text = {
   light: { en: 'Turn on light theme', ru: 'Включить светлую тему' },
   dark: { en: 'Turn on dark theme', ru: 'Включить тёмную тему' },
 } satisfies Record<string, LocalizedText>
+
+const readyCount = (count: number): LocalizedText => ({ en: `${count} case${count === 1 ? '' : 's'} ready`, ru: `Доступно дел: ${count}` })
 
 export function LandingPage({ language, theme, caseCards, onChangeLanguage, onChangeTheme, onPlay }: LandingPageProps) {
   const t = (value: LocalizedText) => getText(value, language)
@@ -71,7 +69,7 @@ export function LandingPage({ language, theme, caseCards, onChangeLanguage, onCh
       </div>
     </section>
     <section id="cases" className="landing-cases" aria-labelledby="cases-title">
-      <div className="landing-section-heading"><h2 id="cases-title">{t(text.choose)}</h2><span>{t(text.ready)}</span></div>
+      <div className="landing-section-heading"><h2 id="cases-title">{t(text.choose)}</h2><span>{t(readyCount(caseCards.length))}</span></div>
       <div className="case-grid">
         {caseCards.map((card) => {
           const title = t(card.title)
@@ -81,7 +79,6 @@ export function LandingPage({ language, theme, caseCards, onChangeLanguage, onCh
             <span>{t(card.number)}</span><strong>{title}</strong><p>{t(card.description)}</p>{card.hasSavedGame && <small>{t(text.inProgress)}</small>}
           </button>
         })}
-        <article className="case-card" aria-disabled="true"><span>{t(text.comingSoon)}</span><strong>{t(text.violin)}</strong><p>{t(text.violinDescription)}</p></article>
       </div>
     </section>
     <section className="landing-steps" aria-label={t(text.explain)}>

@@ -3,10 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { missingCakeCase } from './case/missingCake'
 import { midnightGreenhouseCase } from './case/midnightGreenhouse'
+import { vanishingViolinCase } from './case/vanishingViolin'
 import { createGameRuntime } from './game/runtime'
 
 const cakeRuntime = createGameRuntime(missingCakeCase)
 const greenhouseRuntime = createGameRuntime(midnightGreenhouseCase)
+const violinRuntime = createGameRuntime(vanishingViolinCase)
 
 describe('App landing flow', () => {
   beforeEach(() => {
@@ -53,6 +55,16 @@ describe('App landing flow', () => {
     await waitFor(() => expect(cakeRuntime.hasSavedGame()).toBe(true))
     expect(screen.getByRole('button', { name: 'Resume The Midnight Greenhouse' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Resume The Missing Cake' })).toBeTruthy()
+  })
+
+  it('opens the third case with its own save and localized card labels', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Play The Vanishing Violin' }))
+    expect(screen.getByRole('heading', { name: 'The Vanishing Violin' })).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Music Room' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+    await waitFor(() => expect(violinRuntime.hasSavedGame()).toBe(true))
+    expect(screen.getByRole('button', { name: 'Resume The Vanishing Violin' })).toBeTruthy()
   })
 
   it('uses system theme without saving it, then remembers a manual override', () => {

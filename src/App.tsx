@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useReducer, useState } from 'react'
 import type { CaseDefinition, Language } from './case/types'
 import { missingCakeCase } from './case/missingCake'
 import { midnightGreenhouseCase } from './case/midnightGreenhouse'
+import { vanishingViolinCase } from './case/vanishingViolin'
 import { createGameRuntime } from './game/runtime'
 import type { GameRuntime } from './game/runtime'
 import { GameShell } from './ui/GameShell'
@@ -17,6 +18,11 @@ const games = [
     caseData: midnightGreenhouseCase, runtime: createGameRuntime(midnightGreenhouseCase), number: { en: 'Case 02', ru: 'Дело 02' },
     playLabel: { en: 'Play The Midnight Greenhouse', ru: 'Играть в «Полуночную оранжерею»' },
     resumeLabel: { en: 'Resume The Midnight Greenhouse', ru: 'Продолжить «Полуночную оранжерею»' },
+  },
+  {
+    caseData: vanishingViolinCase, runtime: createGameRuntime(vanishingViolinCase), number: { en: 'Case 03', ru: 'Дело 03' },
+    playLabel: { en: 'Play The Vanishing Violin', ru: 'Играть в «Исчезнувшую скрипку»' },
+    resumeLabel: { en: 'Resume The Vanishing Violin', ru: 'Продолжить «Исчезнувшую скрипку»' },
   },
 ] satisfies { caseData: CaseDefinition; runtime: GameRuntime; number: { en: string; ru: string }; playLabel: { en: string; ru: string }; resumeLabel: { en: string; ru: string } }[]
 const themeStorageKey = 'reasoning-game:theme'
