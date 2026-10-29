@@ -448,3 +448,12 @@ h1 {
   .mission-step .mission-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mission-badge { width: 1.4rem; height: 1.4rem; font-size: .8rem; }
 }
+
+.nav-hint-button { display: none; }
+@media (max-width: 900px) {
+  .mobile-section-nav { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .nav-hint-button { display: grid; justify-items: center; gap: .1rem; min-height: 3.25rem; padding: .4rem .15rem; border: 0; border-radius: .8rem; color: #fffaf3; background: #df6945; font-size: .72rem; font-weight: 700; line-height: 1.1; cursor: pointer; }
+  .nav-hint-button span:first-child { font-size: 1.35rem; line-height: 1; }
+  .header-actions .header-hint-button { display: none; }
+  .header-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
