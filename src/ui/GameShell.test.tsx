@@ -472,7 +472,7 @@ describe('GameShell', () => {
 
   it('integrates theory scoring, retry, evidence preservation, and reconstruction actions', () => {
     const { actions, getState } = renderTheoryHarness({ ...freshGameState(), discoveredHotspotIds: ['cake-stand'] })
-    expect(screen.getByText('The cake was lifted from its stand, not eaten there.')).toBeTruthy()
+    expect(screen.getAllByText('The cake was lifted from its stand, not eaten there.')[0]).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Submit theory' }))
     expect(screen.getByRole('status').textContent).toMatch(/wrong/i)
@@ -493,7 +493,7 @@ describe('GameShell', () => {
     expect(screen.getByRole('heading', { name: 'Reconstruction' })).toBeTruthy()
     expect(actions).toContainEqual({ type: 'setTheory', theory: completeTheory })
     expect(getState().theory).toEqual(completeTheory)
-    expect(screen.getByText('The cake was lifted from its stand, not eaten there.')).toBeTruthy()
+    expect(screen.getAllByText('The cake was lifted from its stand, not eaten there.')[0]).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
     expect(actions).toContainEqual({ type: 'setReconstructionStep', step: 1 })

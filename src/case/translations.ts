@@ -110,5 +110,8 @@ export const caseUiText = {
   softNoSelection: { en: 'First tap some clues in the notebook, then press the button.', ru: 'Сначала нажми на улики в блокноте, потом на кнопку.' },
   soundOn: { en: 'Sound on', ru: 'Звук включён' },
   soundOff: { en: 'Sound off', ru: 'Звук выключен' },
+  boardTitle: { en: 'Clue board — drag clues into the frame, then press the lamp', ru: 'Доска улик — перетащи улики в рамку и нажми на лампочку' },
+  boardDrop: { en: 'Drop clues here', ru: 'Бросай улики сюда' },
+  boardTrayEmpty: { en: 'All clues are on the board', ru: 'Все улики уже на доске' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;
