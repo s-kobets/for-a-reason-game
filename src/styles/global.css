@@ -461,3 +461,8 @@ h1 {
   .nav-hint-button { color: #694739; background: transparent; font-weight: 400; }
   .nav-hint-button:focus-visible { outline: 3px solid #694739; outline-offset: 1px; }
 }
+
+.header-hint-button { display: inline-flex; align-items: center; justify-content: center; }
+.hint-dialog .mission { display: block; margin: 1.5rem 0 0; padding: .6rem; box-shadow: none; }
+.hint-dialog .mission-steps { margin: 0; }
+@media (max-width: 900px) { .header-actions .header-hint-button { display: none; } }

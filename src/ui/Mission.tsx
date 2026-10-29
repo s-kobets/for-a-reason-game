@@ -9,7 +9,6 @@ interface MissionProps {
   deductionsDone: number
   deductionsTotal: number
   solved: boolean
-  onOpenHint(): void
 }
 
 export function missionStep({ foundClues, hasAsked, deductionsDone, deductionsTotal, solved }: Pick<MissionProps, 'foundClues' | 'hasAsked' | 'deductionsDone' | 'deductionsTotal' | 'solved'>): number {
@@ -20,7 +19,7 @@ export function missionText(step: number) {
   return [caseUiText.missionLook, caseUiText.missionLook, caseUiText.missionAsk, caseUiText.missionSelect, caseUiText.missionTheory, caseUiText.missionDone][step]
 }
 
-export function Mission({ language, foundClues, totalClues, hasAsked, deductionsDone, deductionsTotal, solved, onOpenHint }: MissionProps) {
+export function Mission({ language, foundClues, totalClues, hasAsked, deductionsDone, deductionsTotal, solved }: MissionProps) {
   const step = missionStep({ foundClues, hasAsked, deductionsDone, deductionsTotal, solved })
   const steps = [caseUiText.missionStep1, caseUiText.missionStep2, caseUiText.missionStep3, caseUiText.missionStep4]
   const progress = [`${foundClues}/${totalClues}`, hasAsked ? '✓' : '', `${deductionsDone}/${deductionsTotal}`, solved ? '✓' : '']
@@ -36,6 +35,5 @@ export function Mission({ language, foundClues, totalClues, hasAsked, deductions
         </li>
       })}
     </ol>
-    <button type="button" className="owl-button" onClick={onOpenHint}><span aria-hidden="true">🦉</span> {getText(caseUiText.hintMenu, language)}</button>
   </section>
 }
