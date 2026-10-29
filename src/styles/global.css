@@ -457,3 +457,7 @@ h1 {
   .header-actions .header-hint-button { display: none; }
   .header-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+@media (max-width: 900px) {
+  .nav-hint-button { color: #694739; background: transparent; font-weight: 400; }
+  .nav-hint-button:focus-visible { outline: 3px solid #694739; outline-offset: 1px; }
+}
