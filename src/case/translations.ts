@@ -123,5 +123,6 @@ export const caseUiText = {
   theoryLockedProgress: { en: 'deductions made', ru: 'выводов сделано' },
   helpGo: { en: 'Let’s go!', ru: 'Поехали!' },
   badgeEarned: { en: 'New badge!', ru: 'Новый значок!' },
+  inspectList: { en: 'Tap to inspect', ru: 'Что осмотреть' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

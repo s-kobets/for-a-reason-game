@@ -14,6 +14,7 @@ import { FocusBoundary } from './FocusBoundary'
 import { Mission } from './Mission'
 import { awardBadges, type Badge } from '../game/badges'
 import { loadStars, saveBestStars, starsForHints } from '../game/stars'
+import { useIsNarrow } from './useIsNarrow'
 import { Confetti } from './Confetti'
 import { isMuted, playSound, setMuted } from './sound'
 
@@ -39,6 +40,26 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
       return true
     }
   })
+  const narrow = useIsNarrow()
+  const [activeSection, setActiveSection] = useState('scene-title')
+  useEffect(() => {
+    if (!narrow) return
+    const ids = ['scene-title', 'map-title', 'notebook-title', 'theory-title']
+    const update = () => {
+      const line = window.innerHeight * 0.4
+      let current = ids[0]
+      for (const id of ids) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= line) current = id
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8) current = ids[ids.length - 1]
+      setActiveSection(current)
+    }
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', update) }
+  }, [narrow])
   const mapTriggerRef = useRef<HTMLButtonElement>(null)
   const notebookTriggerRef = useRef<HTMLButtonElement>(null)
   const panelCloseRef = useRef<HTMLButtonElement>(null)
@@ -209,8 +230,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
       <div className="header-actions">
         <button type="button" onClick={onHome}>{getText(caseUiText.home, state.language)}</button>
         <button className="language-toggle" type="button" onClick={changeLanguage} aria-label={getText(caseUiText.language, state.language)}>{languageLabel}</button>
-        <button ref={mapTriggerRef} type="button" onClick={() => navigateToPanel('map', '.map-panel')}>{getText(caseUiText.map, state.language)}</button>
-         <button ref={notebookTriggerRef} type="button" onClick={() => navigateToPanel('notebook', '.notebook-layout')}>{getText(caseUiText.notebook, state.language)}</button>
+        <button ref={mapTriggerRef} className="header-panel-button" type="button" onClick={() => navigateToPanel('map', '.map-panel')}>{getText(caseUiText.map, state.language)}</button>
+         <button ref={notebookTriggerRef} className="header-panel-button" type="button" onClick={() => navigateToPanel('notebook', '.notebook-layout')}>{getText(caseUiText.notebook, state.language)}</button>
          <button type="button" aria-pressed={!muted} aria-label={getText(muted ? caseUiText.soundOff : caseUiText.soundOn, state.language)} onClick={toggleSound}>{muted ? '🔇' : '🔊'}</button>
          <button ref={helpTriggerRef} type="button" onClick={openHelp}>{getText(caseUiText.help, state.language)}</button>
          <button ref={resetTriggerRef} type="button" onClick={() => setResetOpen(true)}>{getText(caseUiText.reset, state.language)}</button>
@@ -237,10 +258,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
     </section>}
     {theoryResult === 'complete' && <ReconstructionView steps={caseData.reconstruction} currentStep={state.reconstructionStep} language={state.language} renderScene={caseData.renderReconstruction} onNext={() => dispatch({ type: 'setReconstructionStep', step: state.reconstructionStep + 1 })} onReplay={() => dispatch({ type: 'setReconstructionStep', step: 0 })} />}
      <nav className="mobile-section-nav" aria-label={getText(caseUiText.investigationNavigation, state.language)}>
-      <a href="#scene-title">{getText(caseUiText.scene, state.language)}</a>
-      <a href="#map-title">{getText(caseUiText.map, state.language)}</a>
-      <a href="#notebook-title">{getText(caseUiText.notebook, state.language)}</a>
-      <a href="#theory-title">{getText(caseUiText.theory, state.language)}</a>
+      {([['scene-title', '🔎', caseUiText.scene], ['map-title', '🗺️', caseUiText.map], ['notebook-title', '📒', caseUiText.notebook], ['theory-title', '🧩', caseUiText.theory]] as const).map(([id, icon, label]) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? 'location' : undefined} className={activeSection === id ? 'is-active' : undefined}><span aria-hidden="true">{icon}</span><span>{getText(label, state.language)}</span></a>)}
      </nav>
      {helpOpen && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeHelp() }}><FocusBoundary><section className="help-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title"><button ref={helpCloseRef} className="close-button" type="button" onClick={closeHelp}>{getText(caseUiText.close, state.language)}</button><h2 id="help-title">{getText(caseUiText.helpTitle, state.language)}</h2><ol className="help-steps">{[1, 2, 3, 4, 5, 6].map((step) => <li key={step}><span className="help-icon" aria-hidden="true">{['🗺️', '🔎', '💬', '📌', '🧩', '🦉'][step - 1]}</span><span>{getText(caseUiText[`helpStep${step}` as keyof typeof caseUiText], state.language)}</span></li>)}</ol><button type="button" className="help-go" onClick={closeHelp}>{getText(caseUiText.helpGo, state.language)}</button></section></FocusBoundary></div>}
       {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><FocusBoundary><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} hotspots={caseData.hotspots} discoveredHotspotIds={state.discoveredHotspotIds} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} availableIds={availableDeductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />}</section></FocusBoundary></div>}

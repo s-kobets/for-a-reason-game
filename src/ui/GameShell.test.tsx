@@ -270,7 +270,7 @@ describe('GameShell', () => {
     renderGame()
 
     const navigation = screen.getByRole('navigation', { name: 'Investigation navigation' })
-    expect([...navigation.querySelectorAll('a')].map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+    expect([...navigation.querySelectorAll('a')].map((link) => [link.querySelector('span:last-child')?.textContent, link.getAttribute('href')])).toEqual([
       ['Scene', '#scene-title'],
       ['Map', '#map-title'],
       ['Notebook', '#notebook-title'],

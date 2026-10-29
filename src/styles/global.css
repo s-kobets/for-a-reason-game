@@ -376,3 +376,51 @@ h1 {
 .hotspot-leader { stroke: rgba(255, 250, 243, .9); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 1px 2px rgba(48,39,31,.5)); pointer-events: none; }
 .hotspot-button { height: 100%; line-height: 1.2; white-space: normal; }
 .hotspot-ring:hover { fill: rgba(249, 207, 124, .95); }
+
+/* Mobile UX */
+.inspect-chips { display: flex; flex-wrap: wrap; gap: .5rem; padding: .85rem 1rem 0; }
+.inspect-chips-title { flex-basis: 100%; margin: 0; color: #8b5e4b; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.inspect-chip { min-height: 2.75rem; border: 2px solid #d6c4b3; border-radius: 999px; padding: .5rem .9rem; color: #30271f; background: #fffaf3; font-size: .95rem; cursor: pointer; }
+.inspect-chip.is-found { border-color: #6d9661; color: #31532e; background: #e4f0dc; }
+@media (max-width: 900px) {
+  .mobile-section-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .25rem; }
+  .mobile-section-nav a { display: grid; justify-items: center; gap: .1rem; min-height: 3.25rem; padding: .4rem .15rem; border-radius: .8rem; font-size: .72rem; line-height: 1.1; overflow-wrap: anywhere; }
+  .mobile-section-nav a span:first-child { font-size: 1.35rem; line-height: 1; }
+  .mobile-section-nav a.is-active { color: #fffaf3; background: #8b5e4b; font-weight: 700; }
+  .game-header { gap: .75rem; }
+  .header-actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; width: 100%; }
+  .header-actions .header-panel-button { display: none; }
+  .header-actions button { min-height: 2.75rem; padding: .4rem .2rem; font-size: .85rem; line-height: 1.15; }
+  .scene-actions { padding: .75rem 1rem 1rem; }
+  .scene-actions button, .hint-button, .make-deduction-button, .theory-submit, .panel-close-button { min-height: 2.9rem; }
+  .scene-card, .map-panel, .notebook-panel, .theory-panel { scroll-margin-top: .75rem; }
+  .map-grid { grid-template-columns: 1fr; }
+  .map-location { min-height: 3.4rem; font-size: 1.05rem; }
+  .character-card { max-width: 11.5rem; }
+  .theory-fields select { min-height: 3rem; font-size: 1rem; }
+  .evidence-item { min-height: 3rem; }
+  .board-surface { touch-action: none; }
+}
+@media (max-width: 600px) {
+  .game-shell { padding-inline: .75rem; }
+  .mission { padding: .8rem; }
+  .mission-step { padding: .35rem .5rem; font-size: .8rem; }
+  .mission-step small { display: none; }
+  .scene-heading { padding: .9rem 1rem; }
+  .scene-heading h1 { font-size: 1.4rem; }
+  .character-card { padding: .25rem .4rem; gap: .35rem; }
+  .character-card small, .talk-hint { display: none; }
+  .character-avatar { width: 2.2rem; height: 2.2rem; }
+  .evidence-dialog, .dialogue-panel { padding: 1.25rem; }
+  .overlay { z-index: 30; align-items: end; justify-items: stretch; padding: 0; }
+  .overlay > .focus-boundary { width: 100%; }
+  .overlay .dialogue-panel, .overlay .evidence-dialog, .overlay .confirm-dialog, .overlay .help-dialog { width: 100%; min-width: 0; max-width: 100%; max-height: 88vh; overflow-y: auto; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); border-radius: 1.25rem 1.25rem 0 0; }
+  .dialogue-panel .eyebrow { padding-right: 5rem; }
+  .close-button { min-height: 2.75rem; padding: .4rem .8rem; }
+  .question-list button { min-height: 3rem; font-size: 1rem; }
+  .badge-toast { width: calc(100% - 1.5rem); }
+}
+@media (max-width: 900px) {
+  .board-tray { flex-wrap: wrap; overflow: visible; }
+  .board-tray .board-card { max-width: calc(50% - .3rem); flex: 1 1 calc(50% - .3rem); }
+}

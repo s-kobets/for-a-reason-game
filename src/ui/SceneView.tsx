@@ -4,6 +4,7 @@ import type { Character, Hotspot, Location } from '../case/types'
 import type { GameState } from '../game/state'
 import { formatClueCount, getText, caseUiText } from '../case/translations'
 import { Avatar } from './Avatar'
+import { useIsNarrow } from './useIsNarrow'
 import type { Rect } from './labelLayout'
 import { SCENE_ASPECT_RATIO, SceneArtwork } from './SceneArtwork'
 
@@ -21,6 +22,7 @@ interface SceneViewProps {
 
 export function SceneView({ location, state, hotspots, characters, onHotspot, onCharacter, totalClues, foundClues, renderScene }: SceneViewProps) {
   const [showHints, setShowHints] = useState(false)
+  const narrow = useIsNarrow()
   const stageRef = useRef<HTMLDivElement>(null)
   const [cardRects, setCardRects] = useState<Rect[]>([])
   const cardKey = characters.map((character) => character.id).join()
@@ -63,6 +65,10 @@ export function SceneView({ location, state, hotspots, characters, onHotspot, on
           ))}
         </div>
       </div>
+      {narrow && hotspots.length > 0 && <div className="inspect-chips" role="group" aria-label={getText(caseUiText.inspectList, state.language)}>
+        <p className="inspect-chips-title">{getText(caseUiText.inspectList, state.language)}</p>
+        {hotspots.map((hotspot) => { const found = !hotspot.decorative && state.discoveredHotspotIds.includes(hotspot.id); return <button key={hotspot.id} type="button" className={found ? 'inspect-chip is-found' : 'inspect-chip'} onClick={() => onHotspot(hotspot)}><span aria-hidden="true">{found ? '✓' : '🔎'}</span> {getText(hotspot.title, state.language)}</button> })}
+      </div>}
       <div className="scene-actions">
         <button type="button" aria-pressed={showHints} onClick={() => setShowHints((visible) => !visible)}>{getText(showHints ? caseUiText.hideInspectionHints : caseUiText.showInspectionHints, state.language)}</button>
       </div>

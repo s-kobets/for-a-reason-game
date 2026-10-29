@@ -21,5 +21,5 @@ export function FocusBoundary({ children }: FocusBoundaryProps) {
       first.focus()
     }
   }
-  return <div ref={boundaryRef} onKeyDown={onKeyDown}>{children}</div>
+  return <div ref={boundaryRef} className="focus-boundary" onKeyDown={onKeyDown}>{children}</div>
 }
