@@ -361,3 +361,12 @@ h1 {
 .badge-icon { font-size: 2.4rem; line-height: 1; }
 .badge small { font: .75rem/1.3 system-ui, sans-serif; }
 @media (prefers-reduced-motion: reduce) { .badge-toast { animation: none; } }
+
+/* Scene polish */
+.scene-props { filter: drop-shadow(0 8px 6px rgba(58, 36, 23, .32)); }
+.scene-light, .scene-vignette { pointer-events: none; }
+.scene-light { animation: beam-sway 9s ease-in-out infinite; transform-origin: 50% 0; mix-blend-mode: soft-light; }
+.scene-motes circle { fill: #fffbe0; opacity: 0; animation: mote-float 6s ease-in-out infinite; }
+@keyframes beam-sway { 50% { transform: skewX(-4deg); opacity: .8; } }
+@keyframes mote-float { 0%, 100% { transform: translateY(0); opacity: 0; } 30%, 70% { opacity: .75; } 50% { transform: translateY(-26px); } }
+@media (prefers-reduced-motion: reduce) { .scene-light, .scene-motes circle { animation: none; } .scene-motes circle { opacity: .4; } }
