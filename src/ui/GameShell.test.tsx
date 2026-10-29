@@ -69,7 +69,7 @@ describe('GameShell', () => {
     expect(screen.queryByText('Saved')).toBeNull()
     expect(getText(caseUiText.help, 'en')).toBe('Help')
     expect(getText(caseUiText.helpTitle, 'en')).toBe('How to investigate')
-    expect(getText(caseUiText.helpStep1, 'en')).toBe('Explore locations and inspect objects.')
+    expect(getText(caseUiText.helpStep1, 'en')).toBe('Explore the rooms. Use the map to move around.')
   })
 
   it('opens Help automatically on first visit and reopens it from the header', async () => {
@@ -138,7 +138,7 @@ describe('GameShell', () => {
 
     const dialog = screen.getByRole('dialog', { name: 'Как расследовать дело' })
     expect(dialog).toBeTruthy()
-    expect(screen.getByText('Исследуйте локации и осматривайте предметы.')).toBeTruthy()
+    expect(screen.getByText('Исследуй комнаты. Переходи между ними через карту.')).toBeTruthy()
     const buttons = dialog.querySelectorAll('button')
     buttons[buttons.length - 1].focus()
     fireEvent.keyDown(buttons[buttons.length - 1], { key: 'Tab' })
