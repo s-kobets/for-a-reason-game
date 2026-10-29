@@ -41,6 +41,7 @@ function renderTheoryHarness(initialState: GameState = freshGameState()) {
   return { actions, getState: () => currentState }
 }
 
+const allDeductions = missingCakeCase.deductions.map(({ id }) => id)
 const completeTheory: Theory = { person: 'petya', origin: 'garden', entryMethod: 'window', event: 'moved-to-shed', motive: 'surprise' }
 
 describe('GameShell', () => {
@@ -199,8 +200,20 @@ describe('GameShell', () => {
     expect(screen.getAllByRole('button', { name: 'Make deduction' })).toHaveLength(1)
   })
 
+  it('keeps the theory locked until every deduction is made', () => {
+    renderGame({ ...freshGameState(), deductionIds: allDeductions.slice(0, 1) })
+    expect(screen.queryByRole('button', { name: 'Submit theory' })).toBeNull()
+    expect(screen.getByText(/1 \/ 4 deductions made/)).toBeTruthy()
+    expect(screen.getByText(/unlock your theory/i)).toBeTruthy()
+  })
+
+  it('unlocks the theory once every deduction is made', () => {
+    renderGame({ ...freshGameState(), deductionIds: allDeductions })
+    expect(screen.getByRole('button', { name: 'Submit theory' })).toBeTruthy()
+  })
+
   it('places notebook before the long theory content', () => {
-    renderGame()
+    renderGame({ ...freshGameState(), deductionIds: allDeductions })
 
     const theory = screen.getByRole('heading', { name: 'Your theory' })
     const notebook = screen.getByRole('heading', { name: 'Notebook' }).closest('section')!
@@ -208,7 +221,7 @@ describe('GameShell', () => {
   })
 
   it('renders desktop investigation panels in Scene, Map, Notebook, Theory order', () => {
-    renderGame()
+    renderGame({ ...freshGameState(), deductionIds: allDeductions })
 
     const map = screen.getByRole('heading', { name: 'Map' })
     const scene = screen.getByRole('heading', { name: 'Kitchen' })
@@ -471,7 +484,7 @@ describe('GameShell', () => {
   })
 
   it('integrates theory scoring, retry, evidence preservation, and reconstruction actions', () => {
-    const { actions, getState } = renderTheoryHarness({ ...freshGameState(), discoveredHotspotIds: ['cake-stand'] })
+    const { actions, getState } = renderTheoryHarness({ ...freshGameState(), discoveredHotspotIds: ['cake-stand'], deductionIds: allDeductions })
     expect(screen.getAllByText('The cake was lifted from its stand, not eaten there.')[0]).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Submit theory' }))

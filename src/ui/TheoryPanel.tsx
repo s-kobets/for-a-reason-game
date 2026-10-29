@@ -11,9 +11,16 @@ interface TheoryPanelProps {
   result: TheoryResult | null;
   onChange(theory: Theory): void;
   onSubmit(): void;
+  locked?: boolean;
+  deductionsDone?: number;
+  deductionsTotal?: number;
 }
 
-export function TheoryPanel({ theory, fields, language, result, onChange, onSubmit }: TheoryPanelProps) {
+export function TheoryPanel({ theory, fields, language, result, onChange, onSubmit, locked = false, deductionsDone = 0, deductionsTotal = 0 }: TheoryPanelProps) {
+  if (locked) return <section className="theory-panel is-locked" data-mobile-order="4" aria-labelledby="theory-title">
+    <div className="panel-title"><h2 id="theory-title">🔒 {getText(caseUiText.theory, language)}</h2><span>{deductionsDone} / {deductionsTotal} {getText(caseUiText.theoryLockedProgress, language)}</span></div>
+    <p className="theory-intro">{getText(caseUiText.theoryLockedText, language)}</p>
+  </section>
   return <section className="theory-panel" data-mobile-order="4" aria-labelledby="theory-title">
     <div className="panel-title"><h2 id="theory-title">{getText(caseUiText.theory, language)}</h2></div>
     <p className="theory-intro">{getText(caseUiText.theoryIntro, language)}</p>

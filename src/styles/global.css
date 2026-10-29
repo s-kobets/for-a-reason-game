@@ -337,3 +337,5 @@ h1 {
 @keyframes victory-pop { from { transform: scale(.9); opacity: 0; } }
 @keyframes star-in { from { transform: scale(0) rotate(-90deg); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .victory, .star.is-lit { animation: none; } }
+.theory-panel.is-locked { opacity: .8; border-style: dashed; }
+.theory-panel.is-locked .theory-intro { margin-bottom: 0; padding-bottom: .5rem; }

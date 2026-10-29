@@ -118,5 +118,8 @@ export const caseUiText = {
   victoryHints: { en: 'Hints used', ru: 'Подсказок использовано' },
   victoryWatch: { en: 'Scroll down to watch what really happened.', ru: 'Прокрути вниз и посмотри, как всё было на самом деле.' },
   stars: { en: 'stars', ru: 'звёзд' },
+  theoryLocked: { en: 'Locked', ru: 'Закрыто' },
+  theoryLockedText: { en: 'Make all deductions in the notebook to unlock your theory.', ru: 'Сделай все выводы в блокноте, чтобы открыть теорию.' },
+  theoryLockedProgress: { en: 'deductions made', ru: 'выводов сделано' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

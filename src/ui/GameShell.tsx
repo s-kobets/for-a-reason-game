@@ -172,6 +172,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
     if (elsewhere) return ui('hintGoTo') + ' «' + getText(elsewhere.title, state.language) + '»'
     return ui('hintMore')
   }
+  const theoryUnlocked = state.deductionIds.length >= caseData.deductions.length || theoryResult === 'complete'
   const mobileLocations = caseData.locations.filter(({ id }) => state.openedLocationIds.includes(id))
   const languageLabel = state.language === 'en' ? 'RU' : 'EN'
   const detailDescription = useMemo(() => detail ? getText(detail.description, state.language) : '', [detail, state.language])
@@ -210,7 +211,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
          <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} availableIds={availableDeductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />
       </div>
       <div className="theory-layout">
-         <TheoryPanel theory={state.theory} fields={caseData.theoryFields} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
+         <TheoryPanel locked={!theoryUnlocked} deductionsDone={state.deductionIds.length} deductionsTotal={caseData.deductions.length} theory={state.theory} fields={caseData.theoryFields} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
       </div>
     {justSolved && theoryResult === 'complete' && <section className="victory" role="status">
       <div className="victory-stars" aria-label={`${starsForHints(hintsUsed)} ${ui('stars')}`}>{[1, 2, 3].map((n) => <span key={n} className={n <= starsForHints(hintsUsed) ? 'star is-lit' : 'star'}>★</span>)}</div>
