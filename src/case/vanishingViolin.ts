@@ -76,14 +76,14 @@ export const vanishingViolinCase: CaseDefinition = {
       { id: 'ask-vera-room', text: { en: 'Did you go into the music room after rehearsal?', ru: 'Вы заходили в класс после репетиции?' }, responseStatementIds: ['vera-denies-room'] },
       { id: 'ask-vera-motive', text: { en: 'Why did you move the violin?', ru: 'Зачем вы перенесли скрипку?' }, requires: [{ kind: 'statement', id: 'vera-admits-move' }], responseStatementIds: ['vera-explains-leak'] },
     ] },
-    { id: 'anya', locationId: 'concert-hall', placement: { x: 0.75, y: 0.68 }, name: people.anya, role: { en: 'the violin soloist', ru: 'скрипачка-солистка' }, questions: [
+    { id: 'anya', locationId: 'concert-hall', placement: { x: 0.8, y: 0.8 }, name: people.anya, role: { en: 'the violin soloist', ru: 'скрипачка-солистка' }, questions: [
       { id: 'ask-anya-last-seen', text: { en: 'When did you last see the violin?', ru: 'Когда вы в последний раз видели скрипку?' }, responseStatementIds: ['anya-saw-empty-cabinet'] },
       { id: 'ask-anya-leak', text: { en: 'Did you notice anything unusual in the music room?', ru: 'Вы заметили что-нибудь необычное в классе?' }, responseStatementIds: ['anya-heard-drips'] },
     ] },
     { id: 'pavel', locationId: 'concert-hall', placement: { x: 0.25, y: 0.68 }, name: people.pavel, role: { en: 'the cellist', ru: 'виолончелист' }, questions: [
       { id: 'ask-pavel-rehearsal', text: { en: 'Why is there rosin in the corridor?', ru: 'Почему в коридоре канифоль?' }, responseStatementIds: ['pavel-rehearsal-statement'] },
     ] },
-    { id: 'lev', locationId: 'backstage-corridor', placement: { x: 0.56, y: 0.61 }, name: people.lev, role: { en: 'the stage manager', ru: 'режиссёр концерта' }, questions: [
+    { id: 'lev', locationId: 'backstage-corridor', placement: { x: 0.66, y: 0.8 }, name: people.lev, role: { en: 'the stage manager', ru: 'режиссёр концерта' }, questions: [
       { id: 'ask-lev-key', text: { en: 'Who signed out the master key?', ru: 'Кто брал мастер-ключ?' }, responseStatementIds: ['lev-key-log'] },
       { id: 'ask-lev-cart', text: { en: 'Where do these wheel tracks lead?', ru: 'Куда ведут следы колёс?' }, requires: [{ kind: 'deduction', id: 'service-route' }], responseStatementIds: ['lev-cart-route'] },
     ] },

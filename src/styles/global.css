@@ -370,3 +370,9 @@ h1 {
 @keyframes beam-sway { 50% { transform: skewX(-4deg); opacity: .8; } }
 @keyframes mote-float { 0%, 100% { transform: translateY(0); opacity: 0; } 30%, 70% { opacity: .75; } 50% { transform: translateY(-26px); } }
 @media (prefers-reduced-motion: reduce) { .scene-light, .scene-motes circle { animation: none; } .scene-motes circle { opacity: .4; } }
+
+/* Hotspot labels */
+.hotspot { cursor: pointer; }
+.hotspot-leader { stroke: rgba(255, 250, 243, .9); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 1px 2px rgba(48,39,31,.5)); pointer-events: none; }
+.hotspot-button { height: 100%; line-height: 1.2; white-space: normal; }
+.hotspot-ring:hover { fill: rgba(249, 207, 124, .95); }
