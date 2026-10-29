@@ -129,3 +129,9 @@
   .case-grid, .landing-steps { grid-template-columns: 1fr; }
   .scroll-hint { display: none; }
 }
+
+/* case previews: fill the frame, fade into the card body */
+.case-card-preview { position: relative; height: 12rem; }
+.case-card-preview::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(194,77,44,.85) 100%), linear-gradient(135deg, rgba(255,255,255,.12), transparent 40%); pointer-events: none; }
+[data-theme='dark'] .case-card-preview::after { background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(138,58,36,.9) 100%), linear-gradient(135deg, rgba(255,255,255,.08), transparent 40%); }
+.case-card-preview { height: auto; aspect-ratio: 1000 / 620; max-height: 17rem; }

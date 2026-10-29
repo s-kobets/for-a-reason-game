@@ -88,7 +88,7 @@ export function LandingPage({ language, theme, caseCards, ownedBadgeIds = [], on
           const title = t(card.title)
           const ariaLabel = t(card.hasSavedGame ? card.resumeLabel : card.playLabel)
           return <button key={card.id} className="case-card case-card-live" type="button" onClick={() => onPlay(card.id)} aria-label={ariaLabel}>
-            <span className="case-card-preview" aria-hidden="true"><svg viewBox={SCENE_VIEWBOX} focusable="false" aria-hidden="true"><rect width="1000" height="620" fill="#f4d7a1" />{card.preview}</svg></span>
+            <span className="case-card-preview" aria-hidden="true"><svg viewBox={SCENE_VIEWBOX} preserveAspectRatio="xMidYMid slice" focusable="false" aria-hidden="true"><rect width="1000" height="620" fill="#f4d7a1" />{card.preview}</svg></span>
             <span>{t(card.number)}</span><strong>{title}</strong><p>{t(card.description)}</p>{card.stars ? <small className="case-stars" aria-label={`${card.stars} ${t(text.stars)}`}>{'★'.repeat(card.stars)}{'☆'.repeat(3 - card.stars)}</small> : card.hasSavedGame && <small>{t(text.inProgress)}</small>}
           </button>
         })}
