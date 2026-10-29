@@ -3,6 +3,8 @@ import type { Language, LocalizedText } from '../case/types'
 import { getText } from '../case/translations'
 import { badges } from '../game/badges'
 import { SCENE_VIEWBOX } from './SceneArtwork'
+import { useLandingEffects } from './useLandingEffects'
+import './landing.css'
 
 export type Theme = 'light' | 'dark'
 
@@ -50,7 +52,9 @@ const readyCount = (count: number): LocalizedText => ({ en: `${count} case${coun
 
 export function LandingPage({ language, theme, caseCards, ownedBadgeIds = [], onChangeLanguage, onChangeTheme, onPlay }: LandingPageProps) {
   const t = (value: LocalizedText) => getText(value, language)
-  return <main className="landing-page">
+  const rootRef = useLandingEffects()
+  return <main className="landing-page" ref={rootRef}>
+    <div className="landing-bg" aria-hidden="true"><i className="orb orb-a" /><i className="orb orb-b" /><i className="orb orb-c" /><i className="grain" /><i className="spotlight" /></div>
     <header className="landing-header">
       <a className="landing-brand" href="#top">For a Reason</a>
       <nav aria-label={t(text.nav)}>
@@ -61,21 +65,25 @@ export function LandingPage({ language, theme, caseCards, ownedBadgeIds = [], on
     </header>
     <section id="top" className="landing-hero">
       <div className="landing-hero-copy">
-        <p className="eyebrow">For a Reason</p>
+        <p className="landing-eyebrow"><i />For a Reason</p>
         <h1>{t(text.title)}</h1>
         <p>{t(text.intro)}</p>
-        <a className="landing-primary" href="#cases">{t(text.start)}</a>
+        <div className="landing-cta"><a className="landing-primary" href="#cases">{t(text.start)}<b aria-hidden="true">→</b></a></div>
       </div>
       <div className="landing-preview" aria-hidden="true">
-        <span className="preview-window" />
-        <span className="preview-cake">🍰</span>
+        <svg className="preview-string" viewBox="0 0 400 400" fill="none"><path d="M70 110 C150 60 190 190 200 210 S320 120 335 300" /></svg>
+        <div className="polaroid polaroid-main"><span className="preview-cake">🍰</span><em>CASE 01</em></div>
+        <div className="polaroid polaroid-two"><span>🔍</span><em>?</em></div>
+        <div className="polaroid polaroid-three"><span>🕯️</span><em>!</em></div>
         <span className="preview-clue preview-clue-one">?</span>
         <span className="preview-clue preview-clue-two">!</span>
+        <span className="preview-clue preview-clue-three">✦</span>
       </div>
+      <a className="scroll-hint" href="#cases" aria-hidden="true" tabIndex={-1}><i /></a>
     </section>
     <section id="cases" className="landing-cases" aria-labelledby="cases-title">
-      <div className="landing-section-heading"><h2 id="cases-title">{t(text.choose)}</h2><span>{t(readyCount(caseCards.length))}</span></div>
-      <div className="case-grid">
+      <div className="landing-section-heading" data-reveal><h2 id="cases-title">{t(text.choose)}</h2><span>{t(readyCount(caseCards.length))}</span></div>
+      <div className="case-grid" data-reveal>
         {caseCards.map((card) => {
           const title = t(card.title)
           const ariaLabel = t(card.hasSavedGame ? card.resumeLabel : card.playLabel)
@@ -86,13 +94,13 @@ export function LandingPage({ language, theme, caseCards, ownedBadgeIds = [], on
         })}
       </div>
     </section>
-    <section className="badge-shelf" aria-labelledby="badges-title">
+    <section className="badge-shelf" data-reveal aria-labelledby="badges-title">
       <h2 id="badges-title">{t(text.shelf)} {ownedBadgeIds.length}/{badges.length}</h2>
       <ul>{badges.map((badge) => { const owned = ownedBadgeIds.includes(badge.id); return <li key={badge.id} className={owned ? 'badge is-owned' : 'badge'}><span className="badge-icon" aria-hidden="true">{owned ? badge.icon : '🔒'}</span><strong>{owned ? t(badge.title) : '???'}</strong><small>{t(badge.hint)}</small></li> })}</ul>
     </section>
-    <section className="landing-steps" aria-label={t(text.explain)}>
+    <section className="landing-steps" data-reveal aria-label={t(text.explain)}>
       {[text.explore, text.connect, text.explain].map((step, index) => <div key={step.en}><b>0{index + 1}</b><span>{t(step)}</span></div>)}
     </section>
-    <footer className="landing-footer">{t(text.footer)}</footer>
+    <footer className="landing-footer" data-reveal>{t(text.footer)}</footer>
   </main>
 }
