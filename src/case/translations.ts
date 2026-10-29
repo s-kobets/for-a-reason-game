@@ -122,5 +122,6 @@ export const caseUiText = {
   theoryLockedText: { en: 'Make all deductions in the notebook to unlock your theory.', ru: 'Сделай все выводы в блокноте, чтобы открыть теорию.' },
   theoryLockedProgress: { en: 'deductions made', ru: 'выводов сделано' },
   helpGo: { en: 'Let’s go!', ru: 'Поехали!' },
+  badgeEarned: { en: 'New badge!', ru: 'Новый значок!' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

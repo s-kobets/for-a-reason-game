@@ -12,6 +12,7 @@ import { ReconstructionView } from './ReconstructionView'
 import { TheoryPanel, type TheoryResult } from './TheoryPanel'
 import { FocusBoundary } from './FocusBoundary'
 import { Mission } from './Mission'
+import { awardBadges, type Badge } from '../game/badges'
 import { loadStars, saveBestStars, starsForHints } from '../game/stars'
 import { Confetti } from './Confetti'
 import { isMuted, playSound, setMuted } from './sound'
@@ -28,6 +29,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const [burst, setBurst] = useState(0)
   const [hintsUsed, setHintsUsed] = useState(0)
   const [justSolved, setJustSolved] = useState(false)
+  const [newBadges, setNewBadges] = useState<Badge[]>([])
   const [muted, setMutedState] = useState(isMuted)
   const [resetOpen, setResetOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(() => {
@@ -67,6 +69,19 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
     document.title = getText(caseData.title, state.language)
     document.documentElement.lang = state.language
   }, [caseData.title, state.language])
+  useEffect(() => {
+    const earned: string[] = []
+    if (state.discoveredHotspotIds.some((id) => caseData.hotspots.find((h) => h.id === id && h.observationId))) earned.push('first-clue')
+    if (state.deductionIds.length > 0) earned.push('first-deduction')
+    if (state.resolvedContradictionIds.length > 0) earned.push('confronter')
+    if (justSolved) earned.push('solver', ...(hintsUsed === 0 ? ['perfect'] : []))
+    const fresh = awardBadges(earned)
+    if (fresh.length === 0) return
+    setNewBadges(fresh)
+    playSound('win')
+    const timer = window.setTimeout(() => setNewBadges([]), 4000)
+    return () => window.clearTimeout(timer)
+  }, [state.discoveredHotspotIds, state.deductionIds, state.resolvedContradictionIds, justSolved, hintsUsed, caseData])
   useEffect(() => { if (panel) window.setTimeout(() => panelCloseRef.current?.focus(), 0) }, [panel])
   useEffect(() => { if (character) window.setTimeout(() => dialogueCloseRef.current?.focus(), 0) }, [character])
   useEffect(() => { if (detail) window.setTimeout(() => detailCloseRef.current?.focus(), 0) }, [detail])
@@ -202,6 +217,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
       </div>
     </header>
     <Confetti burst={burst} />
+    {newBadges.length > 0 && <div className="badge-toast" aria-live="polite">{newBadges.map((badge) => <p key={badge.id}><span aria-hidden="true">{badge.icon}</span> <strong>{ui('badgeEarned')}</strong> {getText(badge.title, state.language)}</p>)}</div>}
     <Mission language={state.language} foundClues={foundClues} totalClues={totalClues} hasAsked={state.askedQuestionIds.length > 0} deductionsDone={state.deductionIds.length} deductionsTotal={caseData.deductions.length} solved={theoryResult === 'complete'} getHint={getHint} />
       <div className="game-layout">
          <SceneView location={location} state={state} hotspots={hotspots} characters={characters} totalClues={totalClues} foundClues={foundClues} renderScene={caseData.renderScene} onHotspot={handleHotspot} onCharacter={openCharacter} />

@@ -3,6 +3,7 @@ import type { CaseDefinition, Language } from './case/types'
 import { missingCakeCase } from './case/missingCake'
 import { midnightGreenhouseCase } from './case/midnightGreenhouse'
 import { vanishingViolinCase } from './case/vanishingViolin'
+import { awardBadges, loadBadges } from './game/badges'
 import { loadStars } from './game/stars'
 import { createGameRuntime } from './game/runtime'
 import type { GameRuntime } from './game/runtime'
@@ -95,7 +96,9 @@ function App() {
     stars: loadStars(caseData.id),
   }))
 
+  if (caseCards.every((card) => card.stars)) awardBadges(['all-cases'])
   return <LandingPage
+    ownedBadgeIds={loadBadges()}
     language={language}
     theme={theme}
     caseCards={caseCards}

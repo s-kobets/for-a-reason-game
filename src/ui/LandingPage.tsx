@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Language, LocalizedText } from '../case/types'
 import { getText } from '../case/translations'
+import { badges } from '../game/badges'
 import { SCENE_VIEWBOX } from './SceneArtwork'
 
 export type Theme = 'light' | 'dark'
@@ -21,6 +22,7 @@ interface LandingPageProps {
   language: Language
   theme: Theme
   caseCards: LandingCaseCard[]
+  ownedBadgeIds?: string[]
   onChangeLanguage(): void
   onChangeTheme(): void
   onPlay(caseId: string): void
@@ -31,6 +33,7 @@ const text = {
   title: { en: 'Something happened. Can you work out why?', ru: 'Что-то случилось. Сможете понять почему?' },
   intro: { en: 'Explore cozy scenes, question everyone, connect the clues, and rebuild the whole story.', ru: 'Исследуйте уютные сцены, задавайте вопросы, сопоставляйте улики и восстановите всю историю.' },
   start: { en: 'Start investigating', ru: 'Начать расследование' },
+  shelf: { en: 'Your badges', ru: 'Твои значки' },
   choose: { en: 'Choose a case', ru: 'Выберите дело' },
   stars: { en: 'stars', ru: 'звёзд' },
   inProgress: { en: 'In progress', ru: 'В процессе' },
@@ -45,7 +48,7 @@ const text = {
 
 const readyCount = (count: number): LocalizedText => ({ en: `${count} case${count === 1 ? '' : 's'} ready`, ru: `Доступно дел: ${count}` })
 
-export function LandingPage({ language, theme, caseCards, onChangeLanguage, onChangeTheme, onPlay }: LandingPageProps) {
+export function LandingPage({ language, theme, caseCards, ownedBadgeIds = [], onChangeLanguage, onChangeTheme, onPlay }: LandingPageProps) {
   const t = (value: LocalizedText) => getText(value, language)
   return <main className="landing-page">
     <header className="landing-header">
@@ -82,6 +85,10 @@ export function LandingPage({ language, theme, caseCards, onChangeLanguage, onCh
           </button>
         })}
       </div>
+    </section>
+    <section className="badge-shelf" aria-labelledby="badges-title">
+      <h2 id="badges-title">{t(text.shelf)} {ownedBadgeIds.length}/{badges.length}</h2>
+      <ul>{badges.map((badge) => { const owned = ownedBadgeIds.includes(badge.id); return <li key={badge.id} className={owned ? 'badge is-owned' : 'badge'}><span className="badge-icon" aria-hidden="true">{owned ? badge.icon : '🔒'}</span><strong>{owned ? t(badge.title) : '???'}</strong><small>{t(badge.hint)}</small></li> })}</ul>
     </section>
     <section className="landing-steps" aria-label={t(text.explain)}>
       {[text.explore, text.connect, text.explain].map((step, index) => <div key={step.en}><b>0{index + 1}</b><span>{t(step)}</span></div>)}
