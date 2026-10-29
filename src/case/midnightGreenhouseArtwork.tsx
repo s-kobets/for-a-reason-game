@@ -19,7 +19,55 @@ export const midnightGreenhouseHotspotBounds: Record<string, { x: readonly [numb
   'courtyard-lamp': { x: [0.7, 0.8], y: [0.2, 0.32] },
 }
 
+
+const leaf = (x: number, y: number, s = 1) => <g transform={`translate(${x} ${y}) scale(${s})`}><path d="M-20 0h40l-7 44h-26z" fill="#c4604a" stroke="#694739" strokeWidth="4" /><path d="M0 0c-30-20-30-50-20-64M0 0c0-26 6-48 22-60M0 0c26-10 38-32 34-50" fill="none" stroke="#4f8a5b" strokeWidth="9" strokeLinecap="round" /></g>
+const stars = (pts: [number, number][]) => <g fill="#fffbe0" opacity=".85">{pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 3 : 2} />)}</g>
+
+function greenhouseDecor(sceneId: string): ReactNode {
+  switch (sceneId) {
+    case 'conservatory-diorama': return <>
+      <circle cx="905" cy="62" r="26" fill="#fff4c4" /><circle cx="916" cy="55" r="22" fill="#d3ead1" opacity=".0" />{stars([[820, 40], [760, 70], [950, 120], [60, 60], [200, 30]])}
+      <path d="M170 215 Q330 260 500 215 T830 215" fill="none" stroke="#694739" strokeWidth="3" />{[220, 300, 380, 460, 540, 620, 700, 780].map((x, i) => <circle key={x} cx={x} cy={i % 2 ? 236 : 246} r="7" fill={['#f9cf7c', '#e8c7e8', '#fff4c4'][i % 3]} />)}
+      <path d="M130 440H870" stroke="#526b58" strokeWidth="4" opacity=".4" /><path d="M0 520H1000M0 580H1000" stroke="#3f5f45" strokeWidth="2" opacity=".35" />
+      {leaf(150, 530, 1.2)}{leaf(870, 540, 1.1)}<ellipse cx="560" cy="540" rx="46" ry="12" fill="#a66b4e" opacity=".7" /><path d="M520 540c-4-30 4-50 10-60M560 540c0-30 8-54 20-66M595 540c6-24 18-40 24-50" fill="none" stroke="#557e56" strokeWidth="8" strokeLinecap="round" />
+    </>
+    case 'potting-diorama': return <>
+      <path d="M140 62V118M190 62V104M240 62V122" stroke="#694739" strokeWidth="3" /><g fill="#6f9a5c"><ellipse cx="140" cy="130" rx="14" ry="22" /><ellipse cx="190" cy="118" rx="12" ry="20" /><ellipse cx="240" cy="134" rx="14" ry="22" /></g>
+      <path d="M740 60V110M800 60V96M850 60V116" stroke="#694739" strokeWidth="3" /><g fill="#c4604a"><circle cx="740" cy="120" r="12" /><circle cx="800" cy="106" r="11" /><circle cx="850" cy="126" r="12" /></g>
+      <g stroke="#725744" strokeWidth="4"><rect x="60" y="480" width="120" height="14" rx="3" fill="#a8825a" /><rect x="820" y="480" width="120" height="14" rx="3" fill="#a8825a" /></g>
+      {[80, 110, 140, 840, 870, 900].map((x, i) => <g key={x}><path d={`M${x - 12} 480l4-26h16l4 26z`} fill={['#c4604a', '#d9a066', '#8a6fb0'][i % 3]} /><circle cx={x} cy="446" r="9" fill="#4f8a5b" /></g>)}
+      <path d="M0 540H1000M0 585H1000" stroke="#725744" strokeWidth="2" opacity=".3" />{leaf(500, 560, 0.9)}
+    </>
+    case 'courtyard-diorama': return <>
+      <circle cx="905" cy="75" r="28" fill="#fff4c4" />{stars([[600, 40], [660, 90], [830, 130], [40, 40], [320, 40], [420, 110], [960, 40]])}
+      <g stroke="#604d43" strokeWidth="5" fill="#d8c59f">{[540, 570, 600, 630, 660].map((x) => <path key={x} d={`M${x} 392V330l8-12 8 12V392z`} />)}<path d="M530 346H676M530 376H676" fill="none" /></g>
+      <g fill="#4f8a5b"><circle cx="50" cy="470" r="34" /><circle cx="95" cy="482" r="28" /><circle cx="22" cy="500" r="24" /></g><g fill="#e0657a"><circle cx="40" cy="462" r="5" /><circle cx="98" cy="474" r="5" /></g>
+      <path d="M0 560 Q250 520 500 560 T1000 555 V620H0Z" fill="#4f8a5b" opacity=".4" /><ellipse cx="750" cy="345" rx="120" ry="14" fill="#f5d37a" opacity=".2" />
+    </>
+    case 'head-office-diorama': return <>
+      <circle cx="780" cy="205" r="34" fill="#fffaf3" stroke="#725744" strokeWidth="7" /><path d="M780 205V182M780 205l16 8" stroke="#30271f" strokeWidth="4" strokeLinecap="round" />
+      <rect x="140" y="165" width="110" height="170" rx="6" fill="#a8825a" stroke="#725744" strokeWidth="6" />{[200, 255].map((y) => <path key={y} d={`M140 ${y}H250`} stroke="#725744" strokeWidth="5" />)}{[[150, 'c4604a'], [168, '5e87a0'], [186, 'f9cf7c'], [204, '5a8f66'], [222, 'c4604a']].map(([x, c]) => <rect key={x as number} x={x as number} y="176" width="14" height="24" fill={`#${c}`} />)}
+      <ellipse cx="500" cy="515" rx="260" ry="40" fill="#8a6fb0" opacity=".45" /><ellipse cx="500" cy="515" rx="190" ry="26" fill="none" stroke="#fffaf3" strokeWidth="3" strokeDasharray="8 8" opacity=".6" />
+      {leaf(190, 450, 0.9)}<path d="M860 300V220" stroke="#694739" strokeWidth="7" /><path d="M835 222 Q860 185 885 222Z" fill="#f9cf7c" stroke="#694739" strokeWidth="4" />
+    </>
+    case 'boiler-diorama': return <>
+      <path d="M740 130Q750 100 735 70M780 120Q792 88 775 60" fill="none" stroke="#fffaf3" strokeWidth="14" strokeLinecap="round" opacity=".55" />
+      <g fill="#c4604a" stroke="#514e49" strokeWidth="4"><circle cx="840" cy="400" r="14" /><circle cx="150" cy="320" r="14" /></g>
+      <g stroke="#514e49" strokeWidth="4"><rect x="60" y="470" width="90" height="70" rx="4" fill="#9a6847" /><rect x="110" y="420" width="80" height="60" rx="4" fill="#b07a52" /><path d="M60 505H150M110 450H190" /></g>
+      <path d="M790 540Q840 450 900 480T960 540Z" fill="#30271f" opacity=".85" /><path d="M820 520l8-10M860 500l8-10M900 512l8-10" stroke="#6a6a6a" strokeWidth="4" />
+      <path d="M60 180V280M110 180V270" stroke="#694739" strokeWidth="5" /><path d="M45 280h30l-6 24H51zM96 270h28l-5 26H101z" fill="#a8a29a" stroke="#514e49" strokeWidth="3" />
+      <rect x="860" y="150" width="70" height="50" rx="6" fill="#f9cf7c" stroke="#514e49" strokeWidth="5" /><path d="M895 160v22M895 188v4" stroke="#514e49" strokeWidth="5" strokeLinecap="round" />
+      <path d="M0 560H1000" stroke="#514e49" strokeWidth="2" opacity=".35" /><path d="M300 580h370" stroke="#514e49" strokeWidth="2" strokeDasharray="12 8" opacity=".4" />
+    </>
+    default: return null
+  }
+}
+
 export function renderMidnightGreenhouseScene(sceneId: string): ReactNode {
+  return <>{renderMidnightGreenhouseProps(sceneId)}<g data-decor={sceneId} pointerEvents="none">{greenhouseDecor(sceneId)}</g></>
+}
+
+function renderMidnightGreenhouseProps(sceneId: string): ReactNode {
   switch (sceneId) {
     case 'conservatory-diorama': return <>
       <path d="M110 440V210L500 90 890 210V440Z" fill="#d3ead1" stroke="#526b58" strokeWidth="14" data-scene-prop="glasshouse" />
