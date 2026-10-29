@@ -12,6 +12,7 @@ import { ReconstructionView } from './ReconstructionView'
 import { TheoryPanel, type TheoryResult } from './TheoryPanel'
 import { FocusBoundary } from './FocusBoundary'
 import { Mission } from './Mission'
+import { loadStars, saveBestStars, starsForHints } from '../game/stars'
 import { Confetti } from './Confetti'
 import { isMuted, playSound, setMuted } from './sound'
 
@@ -25,6 +26,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const [deductionFeedback, setDeductionFeedback] = useState('')
   const [theoryResult, setTheoryResult] = useState<TheoryResult | null>(() => runtime.scoreTheory(state.theory) === 'complete' ? 'complete' : null)
   const [burst, setBurst] = useState(0)
+  const [hintsUsed, setHintsUsed] = useState(0)
+  const [justSolved, setJustSolved] = useState(false)
   const [muted, setMutedState] = useState(isMuted)
   const [resetOpen, setResetOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(() => {
@@ -133,6 +136,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const resetGame = () => {
     dispatch({ type: 'reset' })
     setTheoryResult(null)
+    setJustSolved(false)
+    setHintsUsed(0)
     closeReset()
   }
   const handleDeduction = () => {
@@ -151,6 +156,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   }
   const ui = (key: keyof typeof caseUiText) => getText(caseUiText[key], state.language)
   const getHint = () => {
+    setHintsUsed((n) => n + 1)
     if (state.deductionIds.length >= caseData.deductions.length) return ui('hintTheory')
     const ready = caseData.deductions.find((d) => !state.deductionIds.includes(d.id) && d.requiresEvidenceIds.every((id) => acquiredIds.includes(id)))
     if (ready) {
@@ -172,7 +178,11 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const submitTheory = () => {
     const result = runtime.scoreTheory(state.theory)
     playSound(result === 'complete' ? 'win' : 'oops')
-    if (result === 'complete') setBurst((n) => n + 1)
+    if (result === 'complete') {
+      setBurst((n) => n + 1)
+      setJustSolved(true)
+      saveBestStars(caseData.id, starsForHints(hintsUsed))
+    }
     setTheoryResult(result)
   }
   const toggleSound = () => { setMuted(!muted); setMutedState(!muted) }
@@ -202,6 +212,12 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
       <div className="theory-layout">
          <TheoryPanel theory={state.theory} fields={caseData.theoryFields} language={state.language} result={theoryResult} onChange={(theory) => { setTheoryResult(null); dispatch({ type: 'setTheory', theory }) }} onSubmit={submitTheory} />
       </div>
+    {justSolved && theoryResult === 'complete' && <section className="victory" role="status">
+      <div className="victory-stars" aria-label={`${starsForHints(hintsUsed)} ${ui('stars')}`}>{[1, 2, 3].map((n) => <span key={n} className={n <= starsForHints(hintsUsed) ? 'star is-lit' : 'star'}>★</span>)}</div>
+      <h2>{ui('victoryTitle')}</h2>
+      <p>{hintsUsed === 0 ? ui('victoryNoHints') : `${ui('victoryHints')}: ${hintsUsed}`}</p>
+      <p>{ui('victoryWatch')}</p>
+    </section>}
     {theoryResult === 'complete' && <ReconstructionView steps={caseData.reconstruction} currentStep={state.reconstructionStep} language={state.language} renderScene={caseData.renderReconstruction} onNext={() => dispatch({ type: 'setReconstructionStep', step: state.reconstructionStep + 1 })} onReplay={() => dispatch({ type: 'setReconstructionStep', step: 0 })} />}
      <nav className="mobile-section-nav" aria-label={getText(caseUiText.investigationNavigation, state.language)}>
       <a href="#scene-title">{getText(caseUiText.scene, state.language)}</a>

@@ -113,5 +113,10 @@ export const caseUiText = {
   boardTitle: { en: 'Clue board — drag clues into the frame, then press the lamp', ru: 'Доска улик — перетащи улики в рамку и нажми на лампочку' },
   boardDrop: { en: 'Drop clues here', ru: 'Бросай улики сюда' },
   boardTrayEmpty: { en: 'All clues are on the board', ru: 'Все улики уже на доске' },
+  victoryTitle: { en: 'Case solved, detective!', ru: 'Дело раскрыто, детектив!' },
+  victoryNoHints: { en: 'Perfect — no hints needed!', ru: 'Идеально — без подсказок!' },
+  victoryHints: { en: 'Hints used', ru: 'Подсказок использовано' },
+  victoryWatch: { en: 'Scroll down to watch what really happened.', ru: 'Прокрути вниз и посмотри, как всё было на самом деле.' },
+  stars: { en: 'stars', ru: 'звёзд' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

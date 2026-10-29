@@ -14,6 +14,7 @@ export interface LandingCaseCard {
   description: LocalizedText
   preview: ReactNode
   hasSavedGame: boolean
+  stars?: number
 }
 
 interface LandingPageProps {
@@ -31,6 +32,7 @@ const text = {
   intro: { en: 'Explore cozy scenes, question everyone, connect the clues, and rebuild the whole story.', ru: 'Исследуйте уютные сцены, задавайте вопросы, сопоставляйте улики и восстановите всю историю.' },
   start: { en: 'Start investigating', ru: 'Начать расследование' },
   choose: { en: 'Choose a case', ru: 'Выберите дело' },
+  stars: { en: 'stars', ru: 'звёзд' },
   inProgress: { en: 'In progress', ru: 'В процессе' },
   explore: { en: 'Explore every scene', ru: 'Исследуйте каждую сцену' },
   connect: { en: 'Connect clues', ru: 'Сопоставляйте улики' },
@@ -76,7 +78,7 @@ export function LandingPage({ language, theme, caseCards, onChangeLanguage, onCh
           const ariaLabel = t(card.hasSavedGame ? card.resumeLabel : card.playLabel)
           return <button key={card.id} className="case-card case-card-live" type="button" onClick={() => onPlay(card.id)} aria-label={ariaLabel}>
             <span className="case-card-preview" aria-hidden="true"><svg viewBox={SCENE_VIEWBOX} focusable="false" aria-hidden="true"><rect width="1000" height="620" fill="#f4d7a1" />{card.preview}</svg></span>
-            <span>{t(card.number)}</span><strong>{title}</strong><p>{t(card.description)}</p>{card.hasSavedGame && <small>{t(text.inProgress)}</small>}
+            <span>{t(card.number)}</span><strong>{title}</strong><p>{t(card.description)}</p>{card.stars ? <small className="case-stars" aria-label={`${card.stars} ${t(text.stars)}`}>{'★'.repeat(card.stars)}{'☆'.repeat(3 - card.stars)}</small> : card.hasSavedGame && <small>{t(text.inProgress)}</small>}
           </button>
         })}
       </div>

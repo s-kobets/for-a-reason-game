@@ -3,6 +3,7 @@ import type { CaseDefinition, Language } from './case/types'
 import { missingCakeCase } from './case/missingCake'
 import { midnightGreenhouseCase } from './case/midnightGreenhouse'
 import { vanishingViolinCase } from './case/vanishingViolin'
+import { loadStars } from './game/stars'
 import { createGameRuntime } from './game/runtime'
 import type { GameRuntime } from './game/runtime'
 import { GameShell } from './ui/GameShell'
@@ -91,6 +92,7 @@ function App() {
     description: caseData.introduction,
     preview: caseData.renderScene(caseData.locations.find(({ id }) => id === caseData.initialLocationId)?.sceneId ?? ''),
     hasSavedGame: runtime.hasSavedGame(),
+    stars: loadStars(caseData.id),
   }))
 
   return <LandingPage
