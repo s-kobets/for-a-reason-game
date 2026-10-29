@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { Character, Hotspot, Location } from '../case/types'
 import type { GameState } from '../game/state'
 import { formatClueCount, getText, caseUiText } from '../case/translations'
+import { Avatar } from './Avatar'
 import { SCENE_ASPECT_RATIO, SceneArtwork } from './SceneArtwork'
 
 interface SceneViewProps {
@@ -34,7 +35,7 @@ export function SceneView({ location, state, hotspots, characters, onHotspot, on
         <div className="character-layer" aria-label={getText(caseUiText.talkTo, state.language)}>
           {characters.map((character) => (
             <button id={`character-${character.id}`} data-character-id={character.id} key={character.id} type="button" className="character-card" style={{ left: `${character.placement.x * 100}%`, top: `${character.placement.y * 100}%` }} onClick={() => onCharacter(character)}>
-              <span className="character-avatar" aria-hidden="true">{getText(character.name, state.language).slice(0, 1)}</span>
+              <Avatar className="character-avatar" name={getText(character.name, state.language)} />
               <span><strong>{getText(character.name, state.language)}</strong><small>{getText(character.role, state.language)}</small><em className="talk-hint">💬 {getText(caseUiText.tapToTalk, state.language)}</em></span>
             </button>
           ))}

@@ -12,6 +12,8 @@ import { ReconstructionView } from './ReconstructionView'
 import { TheoryPanel, type TheoryResult } from './TheoryPanel'
 import { FocusBoundary } from './FocusBoundary'
 import { Mission } from './Mission'
+import { Confetti } from './Confetti'
+import { isMuted, playSound, setMuted } from './sound'
 
 interface GameShellProps { caseData: CaseDefinition; runtime: GameRuntime; state: GameState; dispatch: Dispatch<GameAction>; onHome(): void }
 const helpStorageKey = 'reasoning-game:help-seen:v1'
@@ -22,6 +24,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const [detail, setDetail] = useState<Hotspot>()
   const [deductionFeedback, setDeductionFeedback] = useState('')
   const [theoryResult, setTheoryResult] = useState<TheoryResult | null>(() => runtime.scoreTheory(state.theory) === 'complete' ? 'complete' : null)
+  const [burst, setBurst] = useState(0)
+  const [muted, setMutedState] = useState(isMuted)
   const [resetOpen, setResetOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(() => {
     try {
@@ -121,6 +125,7 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   }
   const changeLanguage = () => dispatch({ type: 'setLanguage', language: (state.language === 'en' ? 'ru' : 'en') as Language })
   const handleHotspot = (hotspot: Hotspot) => {
+    if (!hotspot.decorative && !state.discoveredHotspotIds.includes(hotspot.id)) playSound('clue')
     if (!hotspot.decorative) dispatch({ type: 'discoverHotspot', hotspotId: hotspot.id })
     focusAfterDetailRef.current = document.activeElement as HTMLElement
     setDetail(hotspot)
@@ -135,9 +140,12 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
     if (!deduction) {
       const selected = new Set(state.selectedEvidenceIds)
       const partial = caseData.deductions.some((d) => !state.deductionIds.includes(d.id) && d.requiresEvidenceIds.some((id) => selected.has(id)))
+      playSound('oops')
       setDeductionFeedback(getText(caseUiText[selected.size === 0 ? 'softNoSelection' : partial ? 'softClose' : 'softNone'], state.language))
       return
     }
+    playSound('win')
+    setBurst((n) => n + 1)
     dispatch({ type: 'makeDeduction', deductionId: deduction.id })
     setDeductionFeedback(getText(caseUiText.deductionAdded, state.language))
   }
@@ -161,7 +169,13 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const mobileLocations = caseData.locations.filter(({ id }) => state.openedLocationIds.includes(id))
   const languageLabel = state.language === 'en' ? 'RU' : 'EN'
   const detailDescription = useMemo(() => detail ? getText(detail.description, state.language) : '', [detail, state.language])
-  const submitTheory = () => setTheoryResult(runtime.scoreTheory(state.theory))
+  const submitTheory = () => {
+    const result = runtime.scoreTheory(state.theory)
+    playSound(result === 'complete' ? 'win' : 'oops')
+    if (result === 'complete') setBurst((n) => n + 1)
+    setTheoryResult(result)
+  }
+  const toggleSound = () => { setMuted(!muted); setMutedState(!muted) }
 
   return <main className="game-shell">
     <header className="game-header">
@@ -171,10 +185,12 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
         <button className="language-toggle" type="button" onClick={changeLanguage} aria-label={getText(caseUiText.language, state.language)}>{languageLabel}</button>
         <button ref={mapTriggerRef} type="button" onClick={() => navigateToPanel('map', '.map-panel')}>{getText(caseUiText.map, state.language)}</button>
          <button ref={notebookTriggerRef} type="button" onClick={() => navigateToPanel('notebook', '.notebook-layout')}>{getText(caseUiText.notebook, state.language)}</button>
-          <button ref={helpTriggerRef} type="button" onClick={openHelp}>{getText(caseUiText.help, state.language)}</button>
+         <button type="button" aria-pressed={!muted} aria-label={getText(muted ? caseUiText.soundOff : caseUiText.soundOn, state.language)} onClick={toggleSound}>{muted ? '🔇' : '🔊'}</button>
+         <button ref={helpTriggerRef} type="button" onClick={openHelp}>{getText(caseUiText.help, state.language)}</button>
          <button ref={resetTriggerRef} type="button" onClick={() => setResetOpen(true)}>{getText(caseUiText.reset, state.language)}</button>
       </div>
     </header>
+    <Confetti burst={burst} />
     <Mission language={state.language} foundClues={foundClues} totalClues={totalClues} hasAsked={state.askedQuestionIds.length > 0} deductionsDone={state.deductionIds.length} deductionsTotal={caseData.deductions.length} solved={theoryResult === 'complete'} getHint={getHint} />
       <div className="game-layout">
          <SceneView location={location} state={state} hotspots={hotspots} characters={characters} totalClues={totalClues} foundClues={foundClues} renderScene={caseData.renderScene} onHotspot={handleHotspot} onCharacter={openCharacter} />

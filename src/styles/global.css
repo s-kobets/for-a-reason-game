@@ -293,3 +293,12 @@ h1 {
 @media (max-width: 600px) { .owl-row { flex-wrap: wrap; } .owl { font-size: 2.2rem; } .hint-button { width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .owl { animation: none; } }
 
+/* Avatars & confetti */
+.character-avatar, .dialogue-portrait { background: none; box-shadow: none; }
+.character-avatar { flex: none; width: 2.8rem; height: 2.8rem; border: 3px solid #f9cf7c; border-radius: 50%; }
+.dialogue-portrait { display: block; width: 5rem; height: 5rem; border: 4px solid #f9cf7c; border-radius: 50%; }
+.confetti { position: fixed; inset: 0; z-index: 20; overflow: hidden; pointer-events: none; }
+.confetti span { position: absolute; top: -12px; width: 10px; height: 16px; border-radius: 2px; animation: confetti-fall 2.2s ease-in forwards; }
+@keyframes confetti-fall { to { transform: translate(var(--drift), 105vh) rotate(var(--spin)); opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .confetti { display: none; } }
+

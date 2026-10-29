@@ -90,12 +90,12 @@ it('formats a singular English clue count', () => {
   expect(screen.getByText('1 / 1 clue')).toBeInTheDocument()
 })
 
-it('uses the selected language for character initials', () => {
+it('uses the selected language for character names', () => {
   const state = { ...runtime.freshState(), language: 'ru' as const }
   const location = missingCakeCase.locations.find(({ id }) => id === 'living-room')!
   const character = missingCakeCase.characters.find(({ id }) => id === 'anya')!
   render(<SceneView location={location} state={state} hotspots={[]} characters={[character]} totalClues={0} foundClues={0} renderScene={missingCakeCase.renderScene} onHotspot={vi.fn()} onCharacter={vi.fn()} />)
-  expect(screen.getByText('А')).toBeInTheDocument()
+  expect(screen.getByText('Аня')).toBeInTheDocument()
 })
 
 it('renders theory fields supplied by the case', () => {

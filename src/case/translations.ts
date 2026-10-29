@@ -108,5 +108,7 @@ export const caseUiText = {
   softClose: { en: 'You are on the right track! Some of these clues fit, but not all.', ru: 'Ты на верном пути! Часть улик подходит, но не все.' },
   softNone: { en: 'These clues do not fit together yet. Try other ones.', ru: 'Эти улики пока не подходят друг другу. Попробуй другие.' },
   softNoSelection: { en: 'First tap some clues in the notebook, then press the button.', ru: 'Сначала нажми на улики в блокноте, потом на кнопку.' },
+  soundOn: { en: 'Sound on', ru: 'Звук включён' },
+  soundOff: { en: 'Sound off', ru: 'Звук выключен' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;
