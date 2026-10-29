@@ -182,7 +182,7 @@ describe('GameShell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Small muddy prints/ }))
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
-    expect(screen.getByRole('status').textContent).toMatch(/not enough evidence/i)
+    expect(screen.getByRole('status').textContent).toMatch(/right track/i)
     expect(screen.getByRole('status').textContent).not.toMatch(/Rain timing/)
 
     fireEvent.click(screen.getByRole('button', { name: /Rain made the footprints/ }))
@@ -357,7 +357,7 @@ describe('GameShell', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
     expect(screen.getByRole('status').textContent).toMatch(/deduction added/i)
     fireEvent.click(screen.getAllByRole('button', { name: 'Make deduction' })[0])
-    expect(screen.getByRole('status').textContent).toMatch(/not enough evidence/i)
+    expect(screen.getByRole('status').textContent).toMatch(/First tap some clues/i)
     expect(screen.getByRole('status').textContent).not.toMatch(/^Deduction added\.$/)
   })
 

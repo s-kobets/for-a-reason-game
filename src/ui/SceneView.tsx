@@ -35,7 +35,7 @@ export function SceneView({ location, state, hotspots, characters, onHotspot, on
           {characters.map((character) => (
             <button id={`character-${character.id}`} data-character-id={character.id} key={character.id} type="button" className="character-card" style={{ left: `${character.placement.x * 100}%`, top: `${character.placement.y * 100}%` }} onClick={() => onCharacter(character)}>
               <span className="character-avatar" aria-hidden="true">{getText(character.name, state.language).slice(0, 1)}</span>
-              <span><strong>{getText(character.name, state.language)}</strong><small>{getText(character.role, state.language)}</small></span>
+              <span><strong>{getText(character.name, state.language)}</strong><small>{getText(character.role, state.language)}</small><em className="talk-hint">💬 {getText(caseUiText.tapToTalk, state.language)}</em></span>
             </button>
           ))}
         </div>

@@ -16,6 +16,7 @@ interface TheoryPanelProps {
 export function TheoryPanel({ theory, fields, language, result, onChange, onSubmit }: TheoryPanelProps) {
   return <section className="theory-panel" data-mobile-order="4" aria-labelledby="theory-title">
     <div className="panel-title"><h2 id="theory-title">{getText(caseUiText.theory, language)}</h2></div>
+    <p className="theory-intro">{getText(caseUiText.theoryIntro, language)}</p>
     <div className="theory-fields">
       {fields.map((field) => <label key={field.id}>
         {getText(field.prompt, language)}
