@@ -124,5 +124,8 @@ export const caseUiText = {
   helpGo: { en: 'Let’s go!', ru: 'Поехали!' },
   badgeEarned: { en: 'New badge!', ru: 'Новый значок!' },
   inspectList: { en: 'Tap to inspect', ru: 'Что осмотреть' },
+  hintMenu: { en: 'Hint', ru: 'Подсказка' },
+  hintShow: { en: 'Show a hint', ru: 'Показать подсказку' },
+  hintMore2: { en: 'Another hint', ru: 'Ещё подсказку' },
   selectedMarker: { en: 'Selected', ru: 'Выбрано' },
 } satisfies Record<string, LocalizedText>;

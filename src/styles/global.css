@@ -414,7 +414,7 @@ h1 {
   .evidence-dialog, .dialogue-panel { padding: 1.25rem; }
   .overlay { z-index: 30; align-items: end; justify-items: stretch; padding: 0; }
   .overlay > .focus-boundary { width: 100%; }
-  .overlay .dialogue-panel, .overlay .evidence-dialog, .overlay .confirm-dialog, .overlay .help-dialog { width: 100%; min-width: 0; max-width: 100%; max-height: 88vh; overflow-y: auto; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); border-radius: 1.25rem 1.25rem 0 0; }
+  .overlay .dialogue-panel, .overlay .evidence-dialog, .overlay .confirm-dialog, .overlay .help-dialog, .overlay .hint-dialog { width: 100%; min-width: 0; max-width: 100%; max-height: 88vh; overflow-y: auto; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); border-radius: 1.25rem 1.25rem 0 0; }
   .dialogue-panel .eyebrow { padding-right: 5rem; }
   .close-button { min-height: 2.75rem; padding: .4rem .8rem; }
   .question-list button { min-height: 3rem; font-size: 1rem; }
@@ -423,4 +423,28 @@ h1 {
 @media (max-width: 900px) {
   .board-tray { flex-wrap: wrap; overflow: visible; }
   .board-tray .board-card { max-width: calc(50% - .3rem); flex: 1 1 calc(50% - .3rem); }
+}
+
+/* Collapsible hint */
+.mission { display: flex; align-items: center; gap: .75rem; padding: .6rem .9rem; }
+.mission-steps { flex: 1; margin: 0; }
+.owl-button { flex: none; display: inline-flex; align-items: center; gap: .4rem; min-height: 2.75rem; border: 0; border-radius: 999px; padding: .5rem 1rem; color: #fffaf3; background: #df6945; box-shadow: 0 3px 0 #a84e33; font-weight: 700; cursor: pointer; }
+.owl-button span { font-size: 1.3rem; line-height: 1; }
+.header-hint-button { display: none; }
+.hint-dialog { position: relative; width: min(34rem, calc(100vw - 2rem)); padding: 2rem; border-radius: 1.25rem; background: #fffaf3; box-shadow: 0 20px 70px rgba(48,39,31,.3); }
+.hint-dialog .owl-row { margin: 1.2rem 0 1rem; }
+.owl-name { margin: 0 0 .3rem; font-size: 1.1rem; }
+.hint-dialog .hint-button { display: block; width: 100%; }
+@media (max-width: 900px) {
+  .mission { padding: .5rem; }
+  .owl-button { display: none; }
+  .header-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .header-actions .header-hint-button { display: inline-flex; align-items: center; justify-content: center; }
+}
+@media (max-width: 900px) and (min-width: 601px) { .mission-steps { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 600px) {
+  .mission-steps { gap: .3rem; }
+  .mission-step { min-width: 0; padding: .3rem .4rem; font-size: .75rem; }
+  .mission-step .mission-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mission-badge { width: 1.4rem; height: 1.4rem; font-size: .8rem; }
 }

@@ -212,6 +212,18 @@ describe('GameShell', () => {
     expect(screen.getByRole('button', { name: 'Submit theory' })).toBeTruthy()
   })
 
+  it('opens the owl hint on demand and counts hints used', () => {
+    renderGame()
+    expect(screen.queryByRole('dialog', { name: /Owl the detective/ })).toBeNull()
+    fireEvent.click(screen.getAllByRole('button', { name: /Hint/ })[0])
+    const dialog = screen.getByRole('dialog', { name: /Owl the detective/ })
+    expect(dialog).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Show a hint' }))
+    expect(screen.getByText(/Look closely near/)).toBeTruthy()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: /Owl the detective/ })).toBeNull()
+  })
+
   it('places notebook before the long theory content', () => {
     renderGame({ ...freshGameState(), deductionIds: allDeductions })
 

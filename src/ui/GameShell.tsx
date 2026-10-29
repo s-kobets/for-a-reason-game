@@ -11,7 +11,7 @@ import { SceneView } from './SceneView'
 import { ReconstructionView } from './ReconstructionView'
 import { TheoryPanel, type TheoryResult } from './TheoryPanel'
 import { FocusBoundary } from './FocusBoundary'
-import { Mission } from './Mission'
+import { Mission, missionStep, missionText } from './Mission'
 import { awardBadges, type Badge } from '../game/badges'
 import { loadStars, saveBestStars, starsForHints } from '../game/stars'
 import { useIsNarrow } from './useIsNarrow'
@@ -30,6 +30,10 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const [burst, setBurst] = useState(0)
   const [hintsUsed, setHintsUsed] = useState(0)
   const [justSolved, setJustSolved] = useState(false)
+  const [hintOpen, setHintOpen] = useState(false)
+  const [hintText, setHintText] = useState('')
+  const hintTriggerRef = useRef<HTMLButtonElement>(null)
+  const hintCloseRef = useRef<HTMLButtonElement>(null)
   const [newBadges, setNewBadges] = useState<Badge[]>([])
   const [muted, setMutedState] = useState(isMuted)
   const [resetOpen, setResetOpen] = useState(false)
@@ -107,6 +111,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   useEffect(() => { if (character) window.setTimeout(() => dialogueCloseRef.current?.focus(), 0) }, [character])
   useEffect(() => { if (detail) window.setTimeout(() => detailCloseRef.current?.focus(), 0) }, [detail])
   useEffect(() => { if (resetOpen) window.setTimeout(() => resetCloseRef.current?.focus(), 0) }, [resetOpen])
+  useEffect(() => { setHintText('') }, [foundClues, state.askedQuestionIds.length, state.deductionIds.length])
+  useEffect(() => { if (hintOpen) window.setTimeout(() => hintCloseRef.current?.focus(), 0) }, [hintOpen])
   useEffect(() => { if (helpOpen) window.setTimeout(() => helpCloseRef.current?.focus(), 0) }, [helpOpen])
   useEffect(() => {
     if (!helpOpen || !helpAutoOpenRef.current) return
@@ -116,7 +122,8 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
-      if (helpOpen) closeHelp()
+      if (hintOpen) closeHint()
+      else if (helpOpen) closeHelp()
       else if (resetOpen) closeReset()
       else if (detail) closeDetail()
       else if (character) closeDialogue()
@@ -149,6 +156,11 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
   const closeReset = () => {
     setResetOpen(false)
     window.setTimeout(() => resetTriggerRef.current?.focus(), 0)
+  }
+  const openHint = () => setHintOpen(true)
+  const closeHint = () => {
+    setHintOpen(false)
+    window.setTimeout(() => hintTriggerRef.current?.focus(), 0)
   }
   const closeHelp = () => {
     setHelpOpen(false)
@@ -233,13 +245,14 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
         <button ref={mapTriggerRef} className="header-panel-button" type="button" onClick={() => navigateToPanel('map', '.map-panel')}>{getText(caseUiText.map, state.language)}</button>
          <button ref={notebookTriggerRef} className="header-panel-button" type="button" onClick={() => navigateToPanel('notebook', '.notebook-layout')}>{getText(caseUiText.notebook, state.language)}</button>
          <button type="button" aria-pressed={!muted} aria-label={getText(muted ? caseUiText.soundOff : caseUiText.soundOn, state.language)} onClick={toggleSound}>{muted ? '🔇' : '🔊'}</button>
+         <button ref={hintTriggerRef} className="header-hint-button" type="button" onClick={openHint}>🦉 {getText(caseUiText.hintMenu, state.language)}</button>
          <button ref={helpTriggerRef} type="button" onClick={openHelp}>{getText(caseUiText.help, state.language)}</button>
          <button ref={resetTriggerRef} type="button" onClick={() => setResetOpen(true)}>{getText(caseUiText.reset, state.language)}</button>
       </div>
     </header>
     <Confetti burst={burst} />
     {newBadges.length > 0 && <div className="badge-toast" aria-live="polite">{newBadges.map((badge) => <p key={badge.id}><span aria-hidden="true">{badge.icon}</span> <strong>{ui('badgeEarned')}</strong> {getText(badge.title, state.language)}</p>)}</div>}
-    <Mission language={state.language} foundClues={foundClues} totalClues={totalClues} hasAsked={state.askedQuestionIds.length > 0} deductionsDone={state.deductionIds.length} deductionsTotal={caseData.deductions.length} solved={theoryResult === 'complete'} getHint={getHint} />
+    <Mission language={state.language} foundClues={foundClues} totalClues={totalClues} hasAsked={state.askedQuestionIds.length > 0} deductionsDone={state.deductionIds.length} deductionsTotal={caseData.deductions.length} solved={theoryResult === 'complete'} onOpenHint={openHint} />
       <div className="game-layout">
          <SceneView location={location} state={state} hotspots={hotspots} characters={characters} totalClues={totalClues} foundClues={foundClues} renderScene={caseData.renderScene} onHotspot={handleHotspot} onCharacter={openCharacter} />
         <MapPanel locations={mobileLocations} hotspots={caseData.hotspots} discoveredHotspotIds={state.discoveredHotspotIds} language={state.language} currentLocationId={location.id} onSelectLocation={(locationId) => dispatch({ type: 'setLocation', locationId })} />
@@ -260,6 +273,10 @@ export function GameShell({ caseData, runtime, state, dispatch, onHome }: GameSh
      <nav className="mobile-section-nav" aria-label={getText(caseUiText.investigationNavigation, state.language)}>
       {([['scene-title', '🔎', caseUiText.scene], ['map-title', '🗺️', caseUiText.map], ['notebook-title', '📒', caseUiText.notebook], ['theory-title', '🧩', caseUiText.theory]] as const).map(([id, icon, label]) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? 'location' : undefined} className={activeSection === id ? 'is-active' : undefined}><span aria-hidden="true">{icon}</span><span>{getText(label, state.language)}</span></a>)}
      </nav>
+     {hintOpen && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeHint() }}><FocusBoundary><section className="hint-dialog" role="dialog" aria-modal="true" aria-labelledby="hint-title"><button ref={hintCloseRef} className="close-button" type="button" onClick={closeHint}>{getText(caseUiText.close, state.language)}</button>
+       <div className="owl-row"><span className="owl" aria-hidden="true">🦉</span><div className="owl-bubble"><h2 id="hint-title" className="owl-name">{getText(caseUiText.owlName, state.language)}</h2><p className="mission-text">{getText(missionText(missionStep({ foundClues, hasAsked: state.askedQuestionIds.length > 0, deductionsDone: state.deductionIds.length, deductionsTotal: caseData.deductions.length, solved: theoryResult === 'complete' })), state.language)}</p>{hintText && <p className="owl-hint" role="status">💡 {hintText}</p>}</div></div>
+       {theoryResult !== 'complete' && <button type="button" className="hint-button" onClick={() => setHintText(getHint())}>{getText(hintText ? caseUiText.hintMore2 : caseUiText.hintShow, state.language)}</button>}
+     </section></FocusBoundary></div>}
      {helpOpen && <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeHelp() }}><FocusBoundary><section className="help-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title"><button ref={helpCloseRef} className="close-button" type="button" onClick={closeHelp}>{getText(caseUiText.close, state.language)}</button><h2 id="help-title">{getText(caseUiText.helpTitle, state.language)}</h2><ol className="help-steps">{[1, 2, 3, 4, 5, 6].map((step) => <li key={step}><span className="help-icon" aria-hidden="true">{['🗺️', '🔎', '💬', '📌', '🧩', '🦉'][step - 1]}</span><span>{getText(caseUiText[`helpStep${step}` as keyof typeof caseUiText], state.language)}</span></li>)}</ol><button type="button" className="help-go" onClick={closeHelp}>{getText(caseUiText.helpGo, state.language)}</button></section></FocusBoundary></div>}
       {panel && <div className="mobile-panel-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closePanel() }}><FocusBoundary><section className="mobile-panel" role="dialog" aria-modal="true" aria-labelledby={panel === 'map' ? 'map-title-mobile' : 'notebook-title-mobile'}>{panel === 'map' ? <MapPanel locations={mobileLocations} hotspots={caseData.hotspots} discoveredHotspotIds={state.discoveredHotspotIds} language={state.language} currentLocationId={location.id} titleId="map-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectLocation={(locationId) => { dispatch({ type: 'setLocation', locationId }); closePanel() }} /> : <NotebookPanel evidence={evidence} deductions={caseData.deductions} completedIds={state.deductionIds} availableIds={availableDeductionIds} selectedIds={state.selectedEvidenceIds} language={state.language} titleId="notebook-title-mobile" closeRef={panelCloseRef} onClose={closePanel} onSelectEvidence={(id) => dispatch({ type: 'toggleEvidence', evidenceId: id })} onMakeDeduction={handleDeduction} feedback={deductionFeedback} />}</section></FocusBoundary></div>}
     <DialoguePanel character={character} questions={questions} askedQuestions={askedQuestions} statements={responses} contradiction={contradiction} contradictionEvidence={contradictionEvidence} language={state.language} closeRef={dialogueCloseRef} onAsk={(questionId) => dispatch({ type: 'askQuestion', questionId })} onContradiction={() => contradiction && dispatch({ type: 'presentContradiction', contradictionId: contradiction.id })} onClose={closeDialogue} />

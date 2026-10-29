@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import type { Language } from '../case/types'
 import { caseUiText, getText } from '../case/translations'
 
@@ -10,14 +9,19 @@ interface MissionProps {
   deductionsDone: number
   deductionsTotal: number
   solved: boolean
-  getHint(): string
+  onOpenHint(): void
 }
 
-export function Mission({ language, foundClues, totalClues, hasAsked, deductionsDone, deductionsTotal, solved, getHint }: MissionProps) {
-  const [hint, setHint] = useState('')
-  useEffect(() => setHint(''), [foundClues, hasAsked, deductionsDone, solved])
-  const step = solved ? 5 : deductionsDone >= deductionsTotal ? 4 : foundClues >= 3 && hasAsked ? 3 : foundClues >= 3 ? 2 : 1
-  const text = [caseUiText.missionLook, caseUiText.missionLook, caseUiText.missionAsk, caseUiText.missionSelect, caseUiText.missionTheory, caseUiText.missionDone][step]
+export function missionStep({ foundClues, hasAsked, deductionsDone, deductionsTotal, solved }: Pick<MissionProps, 'foundClues' | 'hasAsked' | 'deductionsDone' | 'deductionsTotal' | 'solved'>): number {
+  return solved ? 5 : deductionsDone >= deductionsTotal ? 4 : foundClues >= 3 && hasAsked ? 3 : foundClues >= 3 ? 2 : 1
+}
+
+export function missionText(step: number) {
+  return [caseUiText.missionLook, caseUiText.missionLook, caseUiText.missionAsk, caseUiText.missionSelect, caseUiText.missionTheory, caseUiText.missionDone][step]
+}
+
+export function Mission({ language, foundClues, totalClues, hasAsked, deductionsDone, deductionsTotal, solved, onOpenHint }: MissionProps) {
+  const step = missionStep({ foundClues, hasAsked, deductionsDone, deductionsTotal, solved })
   const steps = [caseUiText.missionStep1, caseUiText.missionStep2, caseUiText.missionStep3, caseUiText.missionStep4]
   const progress = [`${foundClues}/${totalClues}`, hasAsked ? '✓' : '', `${deductionsDone}/${deductionsTotal}`, solved ? '✓' : '']
   return <section className="mission" aria-label={getText(caseUiText.missionTitle, language)}>
@@ -32,13 +36,6 @@ export function Mission({ language, foundClues, totalClues, hasAsked, deductions
         </li>
       })}
     </ol>
-    <div className="owl-row">
-      <span className="owl" aria-hidden="true">🦉</span>
-      <div className="owl-bubble">
-        <p className="mission-text"><strong>{getText(caseUiText.owlName, language)}:</strong> {getText(text, language)}</p>
-        {hint && <p className="owl-hint" role="status">💡 {hint}</p>}
-      </div>
-      {!solved && <button type="button" className="hint-button" onClick={() => setHint(getHint())}>{getText(caseUiText.hintButton, language)}</button>}
-    </div>
+    <button type="button" className="owl-button" onClick={onOpenHint}><span aria-hidden="true">🦉</span> {getText(caseUiText.hintMenu, language)}</button>
   </section>
 }
